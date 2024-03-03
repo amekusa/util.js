@@ -1,0 +1,46 @@
+{
+  "name": "@amekusa/util.js",
+  "private": false,
+  "version": "1.0.0",
+  "description": "General utility library for JS",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/import/bundle.js",
+      "require": "./dist/require/bundle.cjs"
+    }
+  },
+  "scripts": {
+    "dev": "npm-watch",
+    "test": "c8 mocha",
+    "lint": "eslint .",
+    "build": "npm run lint && rollup -c rollup.js",
+    "clean": "rm -rf ./dist",
+    "prod": "npm run clean; NODE_ENV=production npm run build",
+    "docs": "npm run docs:gen && npm run docs:publish",
+    "docs:gen": "npm run docs:clean; jsdoc -c jsdoc.json && cd docs/@amekusa/util.js && ln -sfn $npm_package_version latest",
+    "docs:clean": "rm -rf docs/@amekusa/util.js/$npm_package_version",
+    "docs:publish": "git subtree push --prefix docs/@amekusa/util.js origin gh-pages"
+  },
+  "watch": {
+    "build": {
+      "inherit": true,
+      "patterns": ["src"],
+      "extensions": "js"
+    },
+    "test": {
+      "inherit": true,
+      "patterns": ["test", "dist/**"],
+      "extensions": "js",
+      "delay": 500
+    }
+  },
+  "author": "Satoshi Soma (https://amekusa.com)",
+  "license": "MIT",
+  "devDependencies": {
+    "@amekusa/nodeutil": "^1.5.1"
+  }
+}

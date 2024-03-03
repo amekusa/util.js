@@ -8,7 +8,6 @@
 import {env} from 'node:process';
 
 const output = {
-	name: 'karabinerge',
 	sourcemap: env.NODE_ENV != 'production',
 	indent: false,
 	exports: 'named',

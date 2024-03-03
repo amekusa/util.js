@@ -2,7 +2,7 @@
   "name": "@amekusa/util.js",
   "private": false,
   "version": "1.0.0",
-  "description": "General utility library for JS",
+  "description": "General purpose utility for JS",
   "type": "module",
   "files": [
     "dist"

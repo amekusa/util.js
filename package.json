@@ -38,6 +38,14 @@
       "delay": 500
     }
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amekusa/util.js.git"
+  },
+  "keywords": [
+    "utility",
+    "general"
+  ],
   "author": "Satoshi Soma (https://amekusa.com)",
   "license": "MIT",
   "devDependencies": {

@@ -14,6 +14,7 @@ export default [
 		rules: {
 			semi: ['error', 'always'],
 			indent: ['error', 'tab', {
+				ignoreComments: true,
 				ignoredNodes: ['SwitchCase']
 			}]
 		}

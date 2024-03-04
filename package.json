@@ -5,7 +5,7 @@
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "General purpose utility for JS",
   "type": "module",
   "files": [
@@ -32,13 +32,18 @@
   "watch": {
     "build": {
       "inherit": true,
-      "patterns": ["src"],
+      "patterns": [
+        "src"
+      ],
       "extensions": "js",
       "delay": 100
     },
     "test": {
       "inherit": true,
-      "patterns": ["test", "dist/**"],
+      "patterns": [
+        "test",
+        "dist/**"
+      ],
       "extensions": "js,mjs,cjs",
       "delay": 100
     }

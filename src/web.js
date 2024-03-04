@@ -28,12 +28,13 @@
  * @param {string} str
  * @return {string}
  */
-export function escape(str) {
-	// if (!str) return '';
-	return `${str}`.replace(escape_find, escape_replace);
+export function escHTML(str) {
+	return `${str}`.replace(escHTML_find, escHTML_replace);
 }
 
-const escape_map = {
+export const escHtml = escHTML; // alias
+
+const escHTML_map = {
 	'&': 'amp',
 	'"': 'quot',
 	"'": 'apos',
@@ -41,13 +42,9 @@ const escape_map = {
 	'>': 'gt'
 };
 
-const escape_find = new RegExp(`["'<>]|(&(?!${Object.values(escape_map).join('|')};))`, 'g');
+const escHTML_find = new RegExp(`["'<>]|(&(?!${Object.values(escHTML_map).join('|')};))`, 'g');
 	// NOTE:
 	// - This avoids double-escaping '&' symbols
 	// - Regex negative match: (?!word)
 
-const escape_replace = found => `&${escape_map[found]};`;
-
-export default {
-	escape,
-};
+const escHTML_replace = found => `&${escHTML_map[found]};`;

@@ -3,7 +3,7 @@ import {web} from '../dist/import/bundle.js';
 
 const {testFn} = test;
 
-testFn(web.escape, {
+testFn(web.escHTML, {
 	'anchor tag': {
 		args:  ['<a href="https://example.com/index.html?uid=1000&q=hello+world">Click Me!</a>'],
 		return: '&lt;a href=&quot;https://example.com/index.html?uid=1000&amp;q=hello+world&quot;&gt;Click Me!&lt;/a&gt;'

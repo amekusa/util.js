@@ -1,4 +1,5 @@
 /*!
+ * === @amekusa/util.js === *
  * MIT License
  *
  * Copyright (c) 2024 Satoshi Soma
@@ -126,3 +127,5 @@ export default {
 	clean,
 	merge,
 };
+
+export * as web from './web.js';

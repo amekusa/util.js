@@ -33,13 +33,14 @@
     "build": {
       "inherit": true,
       "patterns": ["src"],
-      "extensions": "js"
+      "extensions": "js",
+      "delay": 100
     },
     "test": {
       "inherit": true,
       "patterns": ["test", "dist/**"],
-      "extensions": "js",
-      "delay": 500
+      "extensions": "js,mjs,cjs",
+      "delay": 100
     }
   },
   "repository": {

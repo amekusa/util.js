@@ -33,6 +33,12 @@ export function arr(x) {
 }
 
 /**
+ * Alias of `Array.isArray`.
+ * @return {boolean}
+ */
+export const isArray = Array.isArray;
+
+/**
  * Returns whether the given value can be considered as "empty".
  * @param {any} x
  * @return {boolean}

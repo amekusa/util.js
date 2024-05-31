@@ -149,3 +149,5 @@ export default {
 };
 
 export * as web from './web.js';
+export * as time from './time.js';
+

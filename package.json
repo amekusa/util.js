@@ -31,21 +31,21 @@
   },
   "watch": {
     "build": {
-      "inherit": true,
       "patterns": [
         "src"
       ],
       "extensions": "js",
-      "delay": 100
+      "delay": 100,
+      "inherit": true
     },
     "test": {
-      "inherit": true,
       "patterns": [
         "test",
         "dist/**"
       ],
       "extensions": "js,mjs,cjs",
-      "delay": 100
+      "delay": 100,
+      "inherit": true
     }
   },
   "repository": {

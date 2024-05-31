@@ -124,6 +124,14 @@ testFn(clean, {
 }, 'deepEqual');
 
 testFn(merge, {
+	'num vs num': {
+		args: [1, 2],
+		return: 2
+	},
+	'null vs null': {
+		args: [null, null],
+		return: null
+	},
 	'replace array': {
 		args: [['a', 'b', 'c'], ['x', 'y', 'z']],
 		return: ['x', 'y', 'z']

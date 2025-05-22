@@ -134,6 +134,11 @@ testFn(time.ymd, {
 		returnType: 'string',
 		return: '2000/01/23'
 	},
+	'format = <empty-string>': {
+		args: [new Date('2000-01-23'), ''],
+		returnType: 'string',
+		return: '20000123'
+	},
 	'format = object': {
 		args: [new Date('2000-01-23'), {}],
 		returnType: 'object',
@@ -155,6 +160,11 @@ testFn(time.hms, {
 		args: [new Date('2000-01-23 12:34:56'), '/'],
 		returnType: 'string',
 		return: '12/34/56'
+	},
+	'format = <empty-string>': {
+		args: [new Date('2000-01-23 12:34:56'), ''],
+		returnType: 'string',
+		return: '123456'
 	},
 	'format = object': {
 		args: [new Date('2000-01-23 12:34:56'), {}],

@@ -4,7 +4,7 @@ import {
 	isEmpty,
 	clean,
 	merge,
-} from '../dist/import/bundle.js';
+} from '../dist/bundle.js';
 
 const {testFn} = test;
 

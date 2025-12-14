@@ -13,8 +13,8 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/import/bundle.js",
-      "require": "./dist/require/bundle.cjs"
+      "import": "./dist/bundle.js",
+      "require": "./dist/bundle.cjs"
     }
   },
   "scripts": {

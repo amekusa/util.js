@@ -17,12 +17,12 @@ export default {
 	input: 'src/main.js',
 	output: [
 		{
-			file: 'dist/import/bundle.js',
+			file: 'dist/bundle.js',
 			format: 'es',
 			...output
 		},
 		{
-			file: 'dist/require/bundle.cjs',
+			file: 'dist/bundle.cjs',
 			format: 'cjs',
 			...output
 		},

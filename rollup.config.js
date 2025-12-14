@@ -6,9 +6,10 @@
  */
 
 import {env} from 'node:process';
+const prod = env.NODE_ENV == 'production';
 
 const output = {
-	sourcemap: env.NODE_ENV != 'production',
+	sourcemap: !prod,
 	indent: false,
 	exports: 'named', // this is necessary if the entry point is using named and default exports together
 };
@@ -27,5 +28,5 @@ export default {
 			...output
 		},
 	],
-	treeshake: true,
+	treeshake: prod,
 };

@@ -21,7 +21,7 @@
     "dev": "npm-watch",
     "test": "c8 mocha",
     "lint": "eslint .",
-    "build": "npm run lint && rollup -c rollup.js",
+    "build": "npm run lint && rollup -c",
     "clean": "rm -rf ./dist",
     "prod": "npm run clean; NODE_ENV=production npm run build",
     "docs": "npm run docs:gen && npm run docs:publish",

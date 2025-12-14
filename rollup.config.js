@@ -11,7 +11,7 @@ const prod = env.NODE_ENV == 'production';
 const output = {
 	sourcemap: !prod,
 	indent: false,
-	exports: 'named', // this is necessary if the entry point is using named and default exports together
+	exports: 'named', // this is necessary if the entry point has named and default exports together
 };
 
 export default {

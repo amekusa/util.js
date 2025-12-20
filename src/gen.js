@@ -33,12 +33,6 @@ export function arr(x) {
 }
 
 /**
- * Alias of `Array.isArray`.
- * @return {boolean}
- */
-export const isArray = Array.isArray;
-
-/**
  * Returns whether the given value is a number or a string.
  * @param {any} x
  * @return {boolean}

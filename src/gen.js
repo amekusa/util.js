@@ -1,5 +1,5 @@
 /*!
- * === @amekusa/util.js === *
+ * === @amekusa/util.js/gen === *
  * MIT License
  *
  * Copyright (c) 2024 Satoshi Soma

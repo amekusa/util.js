@@ -53,20 +53,15 @@ export function isNumOrStr(x) {
 }
 
 /**
- * Returns whether the given value can be considered as "empty".
+ * Returns whether the given value can be considered as "empty" or "falsey".
  * @param {any} x
  * @return {boolean}
  */
 export function isEmpty(x) {
+	if (!x) return true;
 	if (Array.isArray(x)) return x.length == 0;
-	switch (typeof x) {
-	case 'string':
-		return !x;
-	case 'object':
-		if (x === null) return true;
-		for (let i in x) return false;
-	case 'undefined':
-		return true;
+	if (typeof x == 'object') {
+		for (let _ in x) return false;
 	}
 	return false;
 }

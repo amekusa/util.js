@@ -130,13 +130,3 @@ export function merge(x, y, opts = {}) {
 	return y;
 }
 
-export default {
-	arr,
-	isEmpty,
-	clean,
-	merge,
-};
-
-export * as web from './web.js';
-export * as time from './time.js';
-

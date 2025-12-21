@@ -51,20 +51,6 @@ export function is(x, ...types) {
 }
 
 /**
- * Returns whether the given value is a number or a string.
- * @param {any} x
- * @return {boolean}
- */
-export function isNumOrStr(x) {
-	switch (typeof x) {
-	case 'number':
-	case 'string':
-		return true;
-	}
-	return false;
-}
-
-/**
  * Returns whether the given value can be considered as "empty" or "falsey".
  * @param {any} x
  * @return {boolean}

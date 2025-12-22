@@ -24,7 +24,7 @@
     "lint": "eslint .",
     "build": "npm run lint && rollup -c",
     "clean": "rm -rf ./dist",
-    "prod": "npm run clean; NODE_ENV=production npm run build",
+    "prod": "npm run clean; NODE_ENV=production npm run build && npm run test",
     "docs": "npm run docs:gen && npm run docs:publish",
     "docs:gen": "npm run docs:clean; jsdoc -c jsdoc.json && cd docs/@amekusa/util.js && ln -sfn $npm_package_version latest",
     "docs:clean": "rm -rf docs/@amekusa/util.js/$npm_package_version",

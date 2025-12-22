@@ -10,30 +10,47 @@ npm i @amekusa/util.js
 
 ### ES
 ```js
-// A) import functions
-import {
-	arr,
-	isEmpty,
-	clean,
-	merge,
-} from '@amekusa/util.js';
+// Import functions
+import {merge, arr, isEmpty} from '@amekusa/util.js';
 
-// B) import as an object
-import util from '@amekusa/util.js';
+// Import categories
+import {gen, time, web, io, sh} from '@amekusa/util.js';
+
+// Import only browser-compatible categories
+import {gen, time, web} from '@amekusa/util.js/browser';
 ```
 
 ### CJS
 ```js
-// A) import functions
-const {
-	arr,
-	isEmpty,
-	clean,
-	merge,
-} = require('@amekusa/util.js');
+// Import functions
+const {merge, arr, isEmpty} = require('@amekusa/util.js');
 
-// B) import as an object
-const util = require('@amekusa/util.js');
+// Import categories
+const {gen, time, web, io, sh} = require('@amekusa/util.js');
+
+// Import only browser-compatible categories
+const {gen, time, web} = require('@amekusa/util.js/browser');
+```
+
+### Browser
+```html
+<script src="amekusa.util.br.js"></script>
+<script src="your-script.js"></script>
+```
+
+```js
+// your-script.js
+const {gen, time, web} = amekusa.util;
+```
+
+### Browser with module loading
+```html
+<script type="module" src="your-script.js"></script>
+```
+
+```js
+// your-script.js
+import {gen, time, web} from './amekusa.util.br.es.js';
 ```
 
 ## LICENSE

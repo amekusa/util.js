@@ -53,11 +53,31 @@ export function is(x, ...types) {
 }
 
 /**
- * Returns whether the given value can be considered as "empty" or "falsey".
+ * Returns whether the given value can be considered as "empty".
  * @param {any} x
  * @return {boolean}
  */
 export function isEmpty(x) {
+	if (Array.isArray(x)) return x.length == 0;
+	switch (typeof x) {
+	case 'string':
+		return !x;
+	case 'object':
+		for (let _ in x) return false;
+		return true;
+	case 'undefined':
+		return true;
+	}
+	return false;
+}
+
+/**
+ * Returns whether the given value can be considered as "empty" or "falsy".
+ * Faster than {@link isEmpty}.
+ * @param {any} x
+ * @return {boolean}
+ */
+export function isEmptyOrFalsy(x) {
 	if (!x) return true;
 	if (Array.isArray(x)) return x.length == 0;
 	if (typeof x == 'object') {
@@ -65,6 +85,12 @@ export function isEmpty(x) {
 	}
 	return false;
 }
+
+/**
+ * @function isEmptyOrFalsey
+ * Alias of {@link isEmptyOrFalsy}.
+ */
+export const isEmptyOrFalsey = isEmptyOrFalsy;
 
 /**
  * Removes "empty" values from the given object or array.
@@ -77,8 +103,8 @@ export function clean(x, recurse = 8) {
 		if (Array.isArray(x)) {
 			let r = [];
 			for (let i = 0; i < x.length; i++) {
-				let I = clean(x[i], recurse - 1);
-				if (!isEmpty(I)) r.push(I);
+				let v = clean(x[i], recurse - 1);
+				if (!isEmpty(v)) r.push(v);
 			}
 			return r;
 		}

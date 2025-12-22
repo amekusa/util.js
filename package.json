@@ -13,9 +13,10 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/bundle.js",
-      "require": "./dist/bundle.cjs"
-    }
+      "import": "./dist/amekusa.util.js",
+      "require": "./dist/amekusa.util.cjs"
+    },
+    "./browser": "./dist/amekusa.util.br.es.js"
   },
   "scripts": {
     "dev": "npm-watch",
@@ -59,6 +60,6 @@
   "author": "Satoshi Soma (https://amekusa.com)",
   "license": "MIT",
   "devDependencies": {
-    "@amekusa/nodeutil": "^3.4.0"
+    "@rollup/plugin-terser": "^0.4.4"
   }
 }

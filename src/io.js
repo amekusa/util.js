@@ -121,23 +121,6 @@ export function clean(dir, pattern = null, opts = {}) {
 }
 
 /**
- * Deletes the given file or directory.
- * @param {string} file
- * @return {Promise}
- */
-export function rm(file) {
-	return fsp.rm(file, {recursive: true, force: true});
-}
-
-/**
- * Deletes the given file or directory synchronously.
- * @param {string} file
- */
-export function rmSync(file) {
-	return fs.rmSync(file, {recursive: true, force: true});
-}
-
-/**
  * Copies the given file(s) to another directory
  * @param {string|object|string[]|object[]} src
  * @param {string} dst Base destination directory

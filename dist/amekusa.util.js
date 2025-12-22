@@ -160,7 +160,7 @@ function merge$1(x, y, opts = {}) {
 		return x.concat(y);
 	}
 	return y;
-}/*!
+}var gen=/*#__PURE__*/Object.freeze({__proto__:null,arr:arr,clean:clean$1,is:is,isEmpty:isEmpty,isEmptyOrFalsey:isEmptyOrFalsey,isEmptyOrFalsy:isEmptyOrFalsy,merge:merge$1});/*!
  * === @amekusa/util.js/web === *
  * MIT License
  *
@@ -923,4 +923,4 @@ function testInstance(construct, cases, opts = {}) {
 			}
 		}
 	});
-}var test=/*#__PURE__*/Object.freeze({__proto__:null,InvalidTest:InvalidTest,assertEqual:assertEqual,assertProps:assertProps,assertType:assertType,testFn:testFn,testInstance:testInstance,testMethod:testMethod});export{arr,clean$1 as clean,io,is,isEmpty,isEmptyOrFalsey,isEmptyOrFalsy,merge$1 as merge,sh,test,time,web};
+}var test=/*#__PURE__*/Object.freeze({__proto__:null,InvalidTest:InvalidTest,assertEqual:assertEqual,assertProps:assertProps,assertType:assertType,testFn:testFn,testInstance:testInstance,testMethod:testMethod});export{arr,clean$1 as clean,gen,io,is,isEmpty,isEmptyOrFalsey,isEmptyOrFalsy,merge$1 as merge,sh,test,time,web};

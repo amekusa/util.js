@@ -160,7 +160,7 @@ function merge$1(x, y, opts = {}) {
 		return x.concat(y);
 	}
 	return y;
-}/*!
+}var gen=/*#__PURE__*/Object.freeze({__proto__:null,arr:arr,clean:clean$1,is:is,isEmpty:isEmpty,isEmptyOrFalsey:isEmptyOrFalsey,isEmptyOrFalsy:isEmptyOrFalsy,merge:merge$1});/*!
  * === @amekusa/util.js/web === *
  * MIT License
  *
@@ -923,4 +923,4 @@ function testInstance(construct, cases, opts = {}) {
 			}
 		}
 	});
-}var test=/*#__PURE__*/Object.freeze({__proto__:null,InvalidTest:InvalidTest,assertEqual:assertEqual,assertProps:assertProps,assertType:assertType,testFn:testFn,testInstance:testInstance,testMethod:testMethod});exports.arr=arr;exports.clean=clean$1;exports.io=io;exports.is=is;exports.isEmpty=isEmpty;exports.isEmptyOrFalsey=isEmptyOrFalsey;exports.isEmptyOrFalsy=isEmptyOrFalsy;exports.merge=merge$1;exports.sh=sh;exports.test=test;exports.time=time;exports.web=web;
+}var test=/*#__PURE__*/Object.freeze({__proto__:null,InvalidTest:InvalidTest,assertEqual:assertEqual,assertProps:assertProps,assertType:assertType,testFn:testFn,testInstance:testInstance,testMethod:testMethod});exports.arr=arr;exports.clean=clean$1;exports.gen=gen;exports.io=io;exports.is=is;exports.isEmpty=isEmpty;exports.isEmptyOrFalsey=isEmptyOrFalsey;exports.isEmptyOrFalsy=isEmptyOrFalsy;exports.merge=merge$1;exports.sh=sh;exports.test=test;exports.time=time;exports.web=web;

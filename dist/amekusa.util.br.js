@@ -160,7 +160,7 @@ function merge(x, y, opts = {}) {
 		return x.concat(y);
 	}
 	return y;
-}/*!
+}var gen=/*#__PURE__*/Object.freeze({__proto__:null,arr:arr,clean:clean,is:is,isEmpty:isEmpty,isEmptyOrFalsey:isEmptyOrFalsey,isEmptyOrFalsy:isEmptyOrFalsy,merge:merge});/*!
  * === @amekusa/util.js/web === *
  * MIT License
  *
@@ -379,4 +379,4 @@ function hms(d, format = null) {
  */
 function iso9075(d) {
 	return ymd(d, '-') + ' ' + hms(d, ':');
-}var time=/*#__PURE__*/Object.freeze({__proto__:null,addTime:addTime,ceil:ceil,date:date,floor:floor,hms:hms,iso9075:iso9075,localize:localize,ms:ms,quantize:quantize,round:round,ymd:ymd});exports.arr=arr;exports.clean=clean;exports.is=is;exports.isEmpty=isEmpty;exports.isEmptyOrFalsey=isEmptyOrFalsey;exports.isEmptyOrFalsy=isEmptyOrFalsy;exports.merge=merge;exports.time=time;exports.web=web;return exports;})({});
+}var time=/*#__PURE__*/Object.freeze({__proto__:null,addTime:addTime,ceil:ceil,date:date,floor:floor,hms:hms,iso9075:iso9075,localize:localize,ms:ms,quantize:quantize,round:round,ymd:ymd});exports.arr=arr;exports.clean=clean;exports.gen=gen;exports.is=is;exports.isEmpty=isEmpty;exports.isEmptyOrFalsey=isEmptyOrFalsey;exports.isEmptyOrFalsy=isEmptyOrFalsy;exports.merge=merge;exports.time=time;exports.web=web;return exports;})({});

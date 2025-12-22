@@ -33,7 +33,7 @@ export function arr(x) {
 }
 
 /**
- * Checks the type of the given value matches with the given type(s).
+ * Checks the type of the given value matches with one of the given types.
  * If a constructor is given to `types`, it checks if `x` is `instanceof` the constructor.
  * @param {any} x
  * @param {...string|function} types - Type or Constructor
@@ -44,10 +44,12 @@ export function is(x, ...types) {
 	for (let i = 0; i < types.length; i++) {
 		let v = types[i];
 		if (typeof v == 'string') {
-			if (t != v) return false;
-		} else if (!(x instanceof v)) return false;
+			if (v == 'array') {
+				if (Array.isArray(x)) return true;
+			} else if (t == v) return true;
+		} else if (x instanceof v) return true;
 	}
-	return true;
+	return false;
 }
 
 /**

@@ -6,8 +6,7 @@ const
 	deq = assert.deepEqual,
 	dseq = assert.deepStrictEqual;
 
-import {test} from '@amekusa/nodeutil';
-import {time} from '../dist/bundle.js';
+import {test, time} from '../dist/amekusa.util.js';
 
 const {testFn} = test;
 

@@ -1,10 +1,10 @@
-import {test} from '@amekusa/nodeutil';
 import {
+	test,
 	arr,
 	isEmpty,
 	clean,
 	merge,
-} from '../dist/bundle.js';
+} from '../dist/amekusa.util.js';
 
 const {testFn} = test;
 

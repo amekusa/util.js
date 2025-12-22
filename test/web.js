@@ -1,5 +1,4 @@
-import {test} from '@amekusa/nodeutil';
-import {web} from '../dist/bundle.js';
+import {test, web} from '../dist/amekusa.util.js';
 
 const {testFn} = test;
 

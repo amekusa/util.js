@@ -162,3 +162,39 @@ export function merge(x, y, opts = {}) {
 	return y;
 }
 
+/**
+ * Gets a property from the given object by the given string path.
+ * @param {object} obj - Object to traverse
+ * @param {string} path - Property names separated with '.'
+ * @return {any} value of the found property, or undefined if it's not found
+ */
+export function dig(obj, path) {
+	path = path.split('.');
+	for (let i = 0; i < path.length; i++) {
+		let p = path[i];
+		if (typeof obj == 'object' && p in obj) obj = obj[p];
+		else return undefined;
+	}
+	return obj;
+}
+
+/**
+ * Substitutes the properties of the given data for the references in the given string.
+ * @param {string} str - String that contains references to the properties
+ * @param {object} data - Object that contains properties to replace the references
+ * @param {object} [opts] - Options
+ * @return {string} a modified `str`
+ */
+export function subst(str, data, opts = {}) {
+	let {
+		modifier = null,
+		start = '{{',
+		end   = '}}',
+	} = opts;
+	let ref = new RegExp(start + '\\s*([-.\\w]+)\\s*' + end, 'g');
+	return str.replaceAll(ref, modifier
+		? (_, m1) => (modifier(dig(data, m1), m1, data) || '')
+		: (_, m1) => (dig(data, m1) || '')
+	);
+}
+

@@ -150,7 +150,8 @@ export function testMethod(construct, method, cases, opts = {}) {
 			// ---- instantiate ----
 			let obj;
 			if (opts.static) {
-				if ('initArgs' in c) invalid(`'initArgs' is not for static method`);
+				if ('initArgs' in c) invalid(`'initArgs' is not available for a static method`);
+				if ('prepare' in c) invalid(`'prepare' is not available for a static method`);
 				obj = construct;
 			} else {
 				let initArgs = [];
@@ -163,6 +164,11 @@ export function testMethod(construct, method, cases, opts = {}) {
 					obj = new construct(...initArgs);
 				} catch (e) {
 					obj = construct(...initArgs);
+				}
+				if ('prepare' in c) {
+					if (typeof c.prepare != 'function') invalid(`'prepare' must be a function`);
+					c.prepare(obj);
+					delete c.prepare;
 				}
 			}
 

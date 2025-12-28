@@ -93,7 +93,7 @@ export class AssetImporter {
 		for (let i = 0; i < find.length; i++) {
 			let r;
 			switch (method) {
-			case 'module':
+			case 'require':
 				try {
 					r = require.resolve(find[i]);
 				} catch (e) {

@@ -1,4 +1,4 @@
-import os from'node:os';import fs from'node:fs';import*as fsp from'node:fs/promises';import path from'node:path';import {Transform}from'node:stream';import {env}from'node:process';import {exec as exec$1}from'node:child_process';import assert from'node:assert';/*!
+import os from'node:os';import fs from'node:fs';import*as fsp from'node:fs/promises';import path,{join,basename,dirname}from'node:path';import {Transform}from'node:stream';import {env}from'node:process';import {exec as exec$1}from'node:child_process';import assert from'node:assert';/*!
  * === @amekusa/util.js/gen === *
  * MIT License
  *
@@ -160,7 +160,43 @@ function merge$1(x, y, opts = {}) {
 		return x.concat(y);
 	}
 	return y;
-}var gen=/*#__PURE__*/Object.freeze({__proto__:null,arr:arr,clean:clean$1,is:is,isEmpty:isEmpty,isEmptyOrFalsey:isEmptyOrFalsey,isEmptyOrFalsy:isEmptyOrFalsy,merge:merge$1});/*!
+}
+
+/**
+ * Gets a property from the given object by the given string path.
+ * @param {object} obj - Object to traverse
+ * @param {string} path - Property names separated with '.'
+ * @return {any} value of the found property, or undefined if it's not found
+ */
+function dig(obj, path) {
+	path = path.split('.');
+	for (let i = 0; i < path.length; i++) {
+		let p = path[i];
+		if (typeof obj == 'object' && p in obj) obj = obj[p];
+		else return undefined;
+	}
+	return obj;
+}
+
+/**
+ * Substitutes the properties of the given data for the references in the given string.
+ * @param {string} str - String that contains references to the properties
+ * @param {object} data - Object that contains properties to replace the references
+ * @param {object} [opts] - Options
+ * @return {string} a modified `str`
+ */
+function subst(str, data, opts = {}) {
+	let {
+		modifier = null,
+		start = '{{',
+		end   = '}}',
+	} = opts;
+	let ref = new RegExp(start + '\\s*([-.\\w]+)\\s*' + end, 'g');
+	return str.replaceAll(ref, modifier
+		? (_, m1) => (modifier(dig(data, m1), m1, data) || '')
+		: (_, m1) => (dig(data, m1) || '')
+	);
+}var gen=/*#__PURE__*/Object.freeze({__proto__:null,arr:arr,clean:clean$1,dig:dig,is:is,isEmpty:isEmpty,isEmptyOrFalsey:isEmptyOrFalsey,isEmptyOrFalsy:isEmptyOrFalsy,merge:merge$1,subst:subst});/*!
  * === @amekusa/util.js/web === *
  * MIT License
  *
@@ -478,7 +514,7 @@ function dev(set = undefined) {
 	if (set != undefined) env.NODE_ENV = set ? value : '';
 	return env.NODE_ENV == value;
 }var sh=/*#__PURE__*/Object.freeze({__proto__:null,args:args,dev:dev,exec:exec,prod:prod});/*!
- * === @amekusa/util.js/io === *
+ * === @amekusa/util.js/io/AssetImporter === *
  * MIT License
  *
  * Copyright (c) 2024 Satoshi Soma
@@ -503,6 +539,188 @@ function dev(set = undefined) {
  */
 
 /**
+ * This is for copying styles or scripts to a certain HTML directory.
+ * @author Satoshi Soma (github.com/amekusa)
+ */
+class AssetImporter {
+	/**
+	 * @param {object} config
+	 * @param {boolean} [config.minify=false] - Prefer `*.min.*` version
+	 * @param {string} config.src - Source dir to search
+	 * @param {string} config.dst - Destination dir
+	 */
+	constructor(config) {
+		this.config = Object.assign({
+			minify: false,
+			src: '', // source dir to search
+			dst: '', // destination dir
+		}, config);
+		this.queue = [];
+		this.results = {
+			script: [],
+			style:  [],
+			asset:  [],
+		};
+	}
+	/**
+	 * Adds a new item to import.
+	 * @param {string|string[]|object|object[]} newImport
+	 */
+	add(newImport) {
+		if (!Array.isArray(newImport)) newImport = [newImport];
+		for (let i = 0; i < newImport.length; i++) {
+			let item = newImport[i];
+			switch (typeof item) {
+			case 'string':
+				item = {src: item};
+				break;
+			case 'object':
+				if (Array.isArray(item)) throw `invalid type: array`;
+				break;
+			default:
+				throw `invalid type: ${typeof item}`;
+			}
+			if (!('src' in item)) throw `'src' property is missing`;
+			this.queue.push(Object.assign({
+				order: 0,
+				resolve: 'local',
+				private: false,
+			}, item));
+		}
+	}
+	/**
+	 * Resolves the location of the given file path
+	 * @param {string} file - File path
+	 * @param {string} method - Resolution method
+	 * @return {string} Resolved file path
+	 */
+	resolve(file, method) {
+		let find = [];
+		if (this.config.minify) {
+			let _ext = ext(file);
+			find.push(ext(file, '.min' + _ext));
+		}
+		find.push(file);
+		for (let i = 0; i < find.length; i++) {
+			let r;
+			switch (method) {
+			case 'module':
+				try {
+					r = require.resolve(find[i]);
+				} catch (e) {
+					if (e.code == 'MODULE_NOT_FOUND') continue;
+					throw e;
+				}
+				return r;
+			case 'local':
+				r = join(this.config.src, find[i]);
+				if (fs.existsSync(r)) return r;
+				break;
+			case 'local:absolute':
+			case 'local:abs':
+				r = find[i];
+				if (fs.existsSync(r)) return r;
+				break;
+			default:
+				throw `invalid resolution method: ${method}`;
+			}
+		}
+		throw `cannot resolve '${file}'`;
+	}
+	/**
+	 * Imports all items in the queue at once.
+	 */
+	import() {
+		let typeMap = {
+			'.css': 'style',
+			'.js': 'script',
+		};
+		this.queue.sort((a, b) => (Number(a.order) - Number(b.order))); // sort by order
+		while (this.queue.length) {
+			let item = this.queue.shift();
+			let {type, src} = item;
+			let url;
+
+			if (!item.resolve) { // no resolution
+				url = src;
+				if (!type) type = typeMap[ext(src)] || 'asset';
+				console.log('---- File Link ----');
+				console.log(' type:', type);
+				console.log('  src:', src);
+
+			} else { // needs resolution
+				let {dst:dstDir, as:dstFile} = item;
+				let create = item.resolve == 'create'; // needs creation?
+				if (create) {
+					if (!dstFile) throw `'as' property is required with {resolve: 'create'}`;
+				} else {
+					src = this.resolve(src, item.resolve);
+					if (!dstFile) dstFile = basename(src);
+				}
+				if (!type) type = typeMap[ext(dstFile)] || 'asset';
+				if (!dstDir) dstDir = type + 's';
+
+				// absolute destination
+				url = join(dstDir, dstFile);
+				let dst = join(this.config.dst, url);
+				dstDir = dirname(dst);
+				if (!fs.existsSync(dstDir)) fs.mkdirSync(dstDir, {recursive:true});
+				if (create) {
+					fs.writeFileSync(dst, src);
+					console.log('---- File Creation ----');
+					console.log(' type:', type);
+					console.log('  dst:', dst);
+				} else {
+					fs.copyFileSync(src, dst);
+					console.log('---- File Import ----');
+					console.log(' type:', type);
+					console.log('  src:', src);
+					console.log('  dst:', dst);
+				}
+			}
+
+			if (!item.private) {
+				if (!(type in this.results)) this.results[type] = [];
+				this.results[type].push({type, url});
+			}
+		}
+	}
+	/**
+	 * Outputs HTML tags for imported items.
+	 * @param {string} [type] - Type
+	 * @return {string} HTML
+	 */
+	toHTML(type = null) {
+		let r;
+		if (type) {
+			let tmpl = templates[type];
+			if (!tmpl) return '';
+			let items = this.results[type];
+			r = new Array(items.length);
+			for (let i = 0; i < items.length; i++) {
+				r[i] = tmpl.replaceAll('%s', items[i].url || '');
+			}
+		} else {
+			let keys = Object.keys(this.results);
+			r = new Array(keys.length);
+			for (let i = 0; i < keys.length; i++) {
+				r[i] = this.toHTML(keys[i]);
+			}
+		}
+		return r.join('\n');
+	}
+}
+
+const templates = {
+	'script':
+		`<script src="%s"></script>`,
+
+	'script:module':
+		`<script type="module" src="%s"></script>`,
+
+	'style':
+		`<link rel="stylesheet" href="%s">`,
+};/**
  * Alias of `os.homedir()`.
  * @type {string}
  */
@@ -649,7 +867,7 @@ function modifyStream(fn) {
 			}
 		}
 	});
-}var io=/*#__PURE__*/Object.freeze({__proto__:null,clean:clean,copy:copy,ext:ext,find:find,home:home,modifyStream:modifyStream,untilde:untilde});const merge = Object.assign;
+}var io=/*#__PURE__*/Object.freeze({__proto__:null,AssetImporter:AssetImporter,clean:clean,copy:copy,ext:ext,find:find,home:home,modifyStream:modifyStream,untilde:untilde});const merge = Object.assign;
 
 /*!
  * === @amekusa/util.js/test === *
@@ -800,7 +1018,8 @@ function testMethod(construct, method, cases, opts = {}) {
 			// ---- instantiate ----
 			let obj;
 			if (opts.static) {
-				if ('initArgs' in c) invalid(`'initArgs' is not for static method`);
+				if ('initArgs' in c) invalid(`'initArgs' is not available for a static method`);
+				if ('prepare' in c) invalid(`'prepare' is not available for a static method`);
 				obj = construct;
 			} else {
 				let initArgs = [];
@@ -813,6 +1032,11 @@ function testMethod(construct, method, cases, opts = {}) {
 					obj = new construct(...initArgs);
 				} catch (e) {
 					obj = construct(...initArgs);
+				}
+				if ('prepare' in c) {
+					if (typeof c.prepare != 'function') invalid(`'prepare' must be a function`);
+					c.prepare(obj);
+					delete c.prepare;
 				}
 			}
 
@@ -923,4 +1147,4 @@ function testInstance(construct, cases, opts = {}) {
 			}
 		}
 	});
-}var test=/*#__PURE__*/Object.freeze({__proto__:null,InvalidTest:InvalidTest,assertEqual:assertEqual,assertProps:assertProps,assertType:assertType,testFn:testFn,testInstance:testInstance,testMethod:testMethod});export{arr,clean$1 as clean,gen,io,is,isEmpty,isEmptyOrFalsey,isEmptyOrFalsy,merge$1 as merge,sh,test,time,web};
+}var test=/*#__PURE__*/Object.freeze({__proto__:null,InvalidTest:InvalidTest,assertEqual:assertEqual,assertProps:assertProps,assertType:assertType,testFn:testFn,testInstance:testInstance,testMethod:testMethod});export{arr,clean$1 as clean,dig,gen,io,is,isEmpty,isEmptyOrFalsey,isEmptyOrFalsy,merge$1 as merge,sh,subst,test,time,web};

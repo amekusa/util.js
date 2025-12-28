@@ -160,7 +160,43 @@ function merge(x, y, opts = {}) {
 		return x.concat(y);
 	}
 	return y;
-}var gen=/*#__PURE__*/Object.freeze({__proto__:null,arr:arr,clean:clean,is:is,isEmpty:isEmpty,isEmptyOrFalsey:isEmptyOrFalsey,isEmptyOrFalsy:isEmptyOrFalsy,merge:merge});/*!
+}
+
+/**
+ * Gets a property from the given object by the given string path.
+ * @param {object} obj - Object to traverse
+ * @param {string} path - Property names separated with '.'
+ * @return {any} value of the found property, or undefined if it's not found
+ */
+function dig(obj, path) {
+	path = path.split('.');
+	for (let i = 0; i < path.length; i++) {
+		let p = path[i];
+		if (typeof obj == 'object' && p in obj) obj = obj[p];
+		else return undefined;
+	}
+	return obj;
+}
+
+/**
+ * Substitutes the properties of the given data for the references in the given string.
+ * @param {string} str - String that contains references to the properties
+ * @param {object} data - Object that contains properties to replace the references
+ * @param {object} [opts] - Options
+ * @return {string} a modified `str`
+ */
+function subst(str, data, opts = {}) {
+	let {
+		modifier = null,
+		start = '{{',
+		end   = '}}',
+	} = opts;
+	let ref = new RegExp(start + '\\s*([-.\\w]+)\\s*' + end, 'g');
+	return str.replaceAll(ref, modifier
+		? (_, m1) => (modifier(dig(data, m1), m1, data) || '')
+		: (_, m1) => (dig(data, m1) || '')
+	);
+}var gen=/*#__PURE__*/Object.freeze({__proto__:null,arr:arr,clean:clean,dig:dig,is:is,isEmpty:isEmpty,isEmptyOrFalsey:isEmptyOrFalsey,isEmptyOrFalsy:isEmptyOrFalsy,merge:merge,subst:subst});/*!
  * === @amekusa/util.js/web === *
  * MIT License
  *
@@ -379,4 +415,4 @@ function hms(d, format = null) {
  */
 function iso9075(d) {
 	return ymd(d, '-') + ' ' + hms(d, ':');
-}var time=/*#__PURE__*/Object.freeze({__proto__:null,addTime:addTime,ceil:ceil,date:date,floor:floor,hms:hms,iso9075:iso9075,localize:localize,ms:ms,quantize:quantize,round:round,ymd:ymd});exports.arr=arr;exports.clean=clean;exports.gen=gen;exports.is=is;exports.isEmpty=isEmpty;exports.isEmptyOrFalsey=isEmptyOrFalsey;exports.isEmptyOrFalsy=isEmptyOrFalsy;exports.merge=merge;exports.time=time;exports.web=web;return exports;})({});
+}var time=/*#__PURE__*/Object.freeze({__proto__:null,addTime:addTime,ceil:ceil,date:date,floor:floor,hms:hms,iso9075:iso9075,localize:localize,ms:ms,quantize:quantize,round:round,ymd:ymd});exports.arr=arr;exports.clean=clean;exports.dig=dig;exports.gen=gen;exports.is=is;exports.isEmpty=isEmpty;exports.isEmptyOrFalsey=isEmptyOrFalsey;exports.isEmptyOrFalsy=isEmptyOrFalsy;exports.merge=merge;exports.subst=subst;exports.time=time;exports.web=web;return exports;})({});

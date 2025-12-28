@@ -184,6 +184,7 @@ export class AssetImporter {
 		if (type) {
 			let tmpl = templates[type];
 			if (!tmpl) return '';
+			if (Array.isArray(tmpl)) tmpl = tmpl.join('\n');
 			let items = this.results[type];
 			r = new Array(items.length);
 			for (let i = 0; i < items.length; i++) {
@@ -201,13 +202,14 @@ export class AssetImporter {
 }
 
 const templates = {
-	'script':
+	script: [
 		`<script src="%s"></script>`,
-
-	'script:module':
+	],
+	module: [
 		`<script type="module" src="%s"></script>`,
-
-	'style':
+	],
+	style: [
 		`<link rel="stylesheet" href="%s">`,
+	],
 };
 

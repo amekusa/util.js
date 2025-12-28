@@ -6,6 +6,7 @@ const
 	dseq = assert.deepStrictEqual;
 
 import {test, io} from '../dist/amekusa.util.js';
+import {testInstance, testMethod} from '../src/test.js';
 const {testFn} = test;
 
 testFn(io.ext, {
@@ -46,3 +47,56 @@ testFn(io.untilde, {
 	}
 });
 
+testInstance(io.AssetImporter, {
+	'default config': {
+		test(inst) {
+			let {
+				minify,
+				src,
+				dst,
+			} = inst.config;
+			eq(minify, false);
+			eq(src, '');
+			eq(dst, '');
+		}
+	},
+	'config': {
+		args: [{
+			minify: true,
+			src: 'foo',
+			dst: 'bar',
+		}],
+		test(inst) {
+			let {
+				minify,
+				src,
+				dst,
+			} = inst.config;
+			eq(minify, true);
+			eq(src, 'foo');
+			eq(dst, 'bar');
+		}
+	}
+});
+
+testMethod(io.AssetImporter, 'add', {
+	'string': {
+		args: ['foo'],
+		test(ret, inst) {
+			let {queue} = inst;
+			eq(queue.length, 1);
+			let {src, resolve} = queue[0];
+			eq(src, 'foo');
+			eq(resolve, 'local');
+		}
+	},
+	'string array': {
+		args: [['foo', 'bar']],
+		test(ret, inst) {
+			let {queue} = inst;
+			eq(queue.length, 2);
+			eq(queue[0].src, 'foo');
+			eq(queue[1].src, 'bar');
+		}
+	}
+});

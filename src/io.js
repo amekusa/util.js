@@ -30,6 +30,8 @@ import {exec} from './sh.js';
  * SOFTWARE.
  */
 
+export {AssetImporter} from './io/AssetImporter.js';
+
 /**
  * Alias of `os.homedir()`.
  * @type {string}

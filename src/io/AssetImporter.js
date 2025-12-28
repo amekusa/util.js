@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import {join, dirname, basename} from 'node:path';
-import {io} from '../io.js';
+import {ext} from '../io.js';
 
 /*!
  * === @amekusa/util.js/io/AssetImporter === *
@@ -31,7 +31,7 @@ import {io} from '../io.js';
  * This is for copying styles or scripts to a certain HTML directory.
  * @author Satoshi Soma (github.com/amekusa)
  */
-class AssetImporter {
+export class AssetImporter {
 	/**
 	 * @param {object} config
 	 * @param {boolean} [config.minify=false] - Prefer `*.min.*` version
@@ -86,8 +86,8 @@ class AssetImporter {
 	resolve(file, method) {
 		let find = [];
 		if (this.config.minify) {
-			let ext = io.ext(file);
-			find.push(io.ext(file, '.min' + ext));
+			let _ext = ext(file);
+			find.push(ext(file, '.min' + _ext));
 		}
 		find.push(file);
 		for (let i = 0; i < find.length; i++) {
@@ -132,7 +132,7 @@ class AssetImporter {
 
 			if (!item.resolve) { // no resolution
 				url = src;
-				if (!type) type = typeMap[io.ext(src)] || 'asset';
+				if (!type) type = typeMap[ext(src)] || 'asset';
 				console.log('---- File Link ----');
 				console.log(' type:', type);
 				console.log('  src:', src);
@@ -146,7 +146,7 @@ class AssetImporter {
 					src = this.resolve(src, item.resolve);
 					if (!dstFile) dstFile = basename(src);
 				}
-				if (!type) type = typeMap[io.ext(dstFile)] || 'asset';
+				if (!type) type = typeMap[ext(dstFile)] || 'asset';
 				if (!dstDir) dstDir = type + 's';
 
 				// absolute destination
@@ -211,4 +211,3 @@ const templates = {
 		`<link rel="stylesheet" href="%s">`,
 };
 
-export default AssetImporter;

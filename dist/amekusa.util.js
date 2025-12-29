@@ -1,4 +1,4 @@
-import os from'node:os';import fs from'node:fs';import*as fsp from'node:fs/promises';import path,{join,basename,dirname}from'node:path';import {Transform}from'node:stream';import {env}from'node:process';import {exec as exec$1}from'node:child_process';import assert from'node:assert';/*!
+import os from'node:os';import fs,{existsSync,mkdirSync}from'node:fs';import*as fsp from'node:fs/promises';import {writeFile,copyFile}from'node:fs/promises';import path,{join,basename,dirname}from'node:path';import {Transform}from'node:stream';import {env}from'node:process';import {exec as exec$1}from'node:child_process';import assert from'node:assert';/*!
  * === @amekusa/util.js/gen === *
  * MIT License
  *
@@ -604,7 +604,7 @@ class AssetImporter {
 		for (let i = 0; i < find.length; i++) {
 			let r;
 			switch (method) {
-			case 'module':
+			case 'require':
 				try {
 					r = require.resolve(find[i]);
 				} catch (e) {
@@ -614,12 +614,12 @@ class AssetImporter {
 				return r;
 			case 'local':
 				r = join(this.config.src, find[i]);
-				if (fs.existsSync(r)) return r;
+				if (existsSync(r)) return r;
 				break;
 			case 'local:absolute':
 			case 'local:abs':
 				r = find[i];
-				if (fs.existsSync(r)) return r;
+				if (existsSync(r)) return r;
 				break;
 			default:
 				throw `invalid resolution method: ${method}`;
@@ -629,8 +629,10 @@ class AssetImporter {
 	}
 	/**
 	 * Imports all items in the queue at once.
+	 * @return {Promise}
 	 */
 	import() {
+		let tasks = [];
 		let typeMap = {
 			'.css': 'style',
 			'.js': 'script',
@@ -664,18 +666,20 @@ class AssetImporter {
 				url = join(dstDir, dstFile);
 				let dst = join(this.config.dst, url);
 				dstDir = dirname(dst);
-				if (!fs.existsSync(dstDir)) fs.mkdirSync(dstDir, {recursive:true});
+				if (!existsSync(dstDir)) mkdirSync(dstDir, {recursive:true});
+
+				// create/copy file
 				if (create) {
-					fs.writeFileSync(dst, src);
 					console.log('---- File Creation ----');
 					console.log(' type:', type);
 					console.log('  dst:', dst);
+					tasks.push(writeFile(dst, src));
 				} else {
-					fs.copyFileSync(src, dst);
 					console.log('---- File Import ----');
 					console.log(' type:', type);
 					console.log('  src:', src);
 					console.log('  dst:', dst);
+					tasks.push(copyFile(src, dst));
 				}
 			}
 
@@ -684,6 +688,8 @@ class AssetImporter {
 				this.results[type].push({type, url});
 			}
 		}
+
+		return tasks.length ? Promise.all(tasks) : Promise.resolve();
 	}
 	/**
 	 * Outputs HTML tags for imported items.
@@ -695,6 +701,7 @@ class AssetImporter {
 		if (type) {
 			let tmpl = templates[type];
 			if (!tmpl) return '';
+			if (Array.isArray(tmpl)) tmpl = tmpl.join('\n');
 			let items = this.results[type];
 			r = new Array(items.length);
 			for (let i = 0; i < items.length; i++) {
@@ -712,14 +719,15 @@ class AssetImporter {
 }
 
 const templates = {
-	'script':
+	script: [
 		`<script src="%s"></script>`,
-
-	'script:module':
+	],
+	module: [
 		`<script type="module" src="%s"></script>`,
-
-	'style':
+	],
+	style: [
 		`<link rel="stylesheet" href="%s">`,
+	],
 };/**
  * Alias of `os.homedir()`.
  * @type {string}

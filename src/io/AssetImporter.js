@@ -133,14 +133,7 @@ export class AssetImporter {
 			let {type, src} = item;
 			let url;
 
-			if (!item.resolve) { // no resolution
-				url = src;
-				if (!type) type = typeMap[ext(src)] || 'asset';
-				console.log('---- File Link ----');
-				console.log(' type:', type);
-				console.log('  src:', src);
-
-			} else { // needs resolution
+			if (item.resolve) { // needs resolution
 				let {dst:dstDir, as:dstFile} = item;
 				let create = item.resolve == 'create'; // needs creation?
 				if (create) {
@@ -171,6 +164,13 @@ export class AssetImporter {
 					console.log('  dst:', dst);
 					tasks.push(copyFile(src, dst));
 				}
+
+			} else { // no resolution
+				url = src;
+				if (!type) type = typeMap[ext(src)] || 'asset';
+				console.log('---- File Link ----');
+				console.log(' type:', type);
+				console.log('  src:', src);
 			}
 
 			if (!item.private) {

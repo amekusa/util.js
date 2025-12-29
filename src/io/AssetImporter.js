@@ -1,4 +1,5 @@
-import fs from 'node:fs';
+import {existsSync, mkdirSync} from 'node:fs';
+import {copyFile, writeFile} from 'node:fs/promises';
 import {join, dirname, basename} from 'node:path';
 import {ext} from '../io.js';
 
@@ -103,12 +104,12 @@ export class AssetImporter {
 				return r;
 			case 'local':
 				r = join(this.config.src, find[i]);
-				if (fs.existsSync(r)) return r;
+				if (existsSync(r)) return r;
 				break;
 			case 'local:absolute':
 			case 'local:abs':
 				r = find[i];
-				if (fs.existsSync(r)) return r;
+				if (existsSync(r)) return r;
 				break;
 			default:
 				throw `invalid resolution method: ${method}`;
@@ -118,8 +119,10 @@ export class AssetImporter {
 	}
 	/**
 	 * Imports all items in the queue at once.
+	 * @return {Promise}
 	 */
 	import() {
+		let tasks = [];
 		let typeMap = {
 			'.css': 'style',
 			'.js': 'script',
@@ -153,18 +156,20 @@ export class AssetImporter {
 				url = join(dstDir, dstFile);
 				let dst = join(this.config.dst, url);
 				dstDir = dirname(dst);
-				if (!fs.existsSync(dstDir)) fs.mkdirSync(dstDir, {recursive:true});
+				if (!existsSync(dstDir)) mkdirSync(dstDir, {recursive:true});
+
+				// create/copy file
 				if (create) {
-					fs.writeFileSync(dst, src);
 					console.log('---- File Creation ----');
 					console.log(' type:', type);
 					console.log('  dst:', dst);
+					tasks.push(writeFile(dst, src));
 				} else {
-					fs.copyFileSync(src, dst);
 					console.log('---- File Import ----');
 					console.log(' type:', type);
 					console.log('  src:', src);
 					console.log('  dst:', dst);
+					tasks.push(copyFile(src, dst));
 				}
 			}
 
@@ -173,6 +178,8 @@ export class AssetImporter {
 				this.results[type].push({type, url});
 			}
 		}
+
+		return tasks.length ? Promise.all(tasks) : Promise.resolve();
 	}
 	/**
 	 * Outputs HTML tags for imported items.

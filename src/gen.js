@@ -143,8 +143,11 @@ export function clean(x, recurse = 8) {
  */
 export function clone(x, recurse = 8) {
 	if (recurse) {
-		if (Array.isArray(x) || x instanceof TypedArray) {
+		if (Array.isArray(x)) {
 			return x.map(it => clone(it, recurse - 1));
+		}
+		if (x instanceof TypedArray) {
+			return x.subarray();
 		}
 		if (typeof x == 'object') {
 			let r = {};

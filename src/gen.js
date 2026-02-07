@@ -24,20 +24,6 @@
  */
 
 /**
- * @class TypedArray
- */
-export const TypedArray = Object.getPrototypeOf(Int8Array);
-
-/**
- * Checks if the given value is an {@link TypedArray}.
- * @param {any} x
- * @return {boolean}
- */
-export function isTypedArray(x) {
-	return x instanceof TypedArray;
-}
-
-/**
  * Coerces the given value into an array.
  * @param {any} x
  * @return {any[]}
@@ -105,6 +91,20 @@ export function isEmptyOrFalsy(x) {
  * Alias of {@link isEmptyOrFalsy}.
  */
 export const isEmptyOrFalsey = isEmptyOrFalsy;
+
+/**
+ * @class TypedArray
+ */
+export const TypedArray = Object.getPrototypeOf(Int8Array);
+
+/**
+ * Checks if the given value is an {@link TypedArray}.
+ * @param {any} x
+ * @return {boolean}
+ */
+export function isTypedArray(x) {
+	return x instanceof TypedArray;
+}
 
 /**
  * Removes "empty" values from the given object or array.

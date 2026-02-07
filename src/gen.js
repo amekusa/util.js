@@ -138,12 +138,12 @@ export function clean(x, recurse = 8) {
  * Recursively clones the given value (deep clone). 
  * The given value won't be modified.
  * @param {any} x - Value to clone
- * @param {number} [recurse=8] - Recursion limit
+ * @param {number} [recurse=8] - Recursion limit. Negative number means unlimited
  * @return {any} Cloned value
  */
 export function clone(x, recurse = 8) {
 	if (recurse) {
-		if (Array.isArray(x)) {
+		if (Array.isArray(x) || x instanceof TypedArray) {
 			return x.map(it => clone(it, recurse - 1));
 		}
 		if (typeof x == 'object') {

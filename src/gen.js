@@ -24,6 +24,20 @@
  */
 
 /**
+ * @class TypedArray
+ */
+export const TypedArray = Object.getPrototypeOf(Int8Array);
+
+/**
+ * Checks if the given value is an {@link TypedArray}.
+ * @param {any} x
+ * @return {boolean}
+ */
+export function isTypedArray(x) {
+	return x instanceof TypedArray;
+}
+
+/**
  * Coerces the given value into an array.
  * @param {any} x
  * @return {any[]}

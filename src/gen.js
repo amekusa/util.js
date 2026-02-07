@@ -121,6 +121,27 @@ export function clean(x, recurse = 8) {
 }
 
 /**
+ * Recursively clones the given value (deep clone). 
+ * The given value won't be modified.
+ * @param {any} x - Value to clone
+ * @param {number} [recurse=8] - Recursion limit
+ * @return {any} Cloned value
+ */
+export function clone(x, recurse = 8) {
+	if (recurse) {
+		if (Array.isArray(x)) {
+			return x.map(it => clone(it, recurse - 1));
+		}
+		if (typeof x == 'object') {
+			let r = {};
+			for (let k in x) r[k] = clone(x[k], recurse - 1);
+			return r;
+		}
+	}
+	return x;
+}
+
+/**
  * Merges the 2nd object into the 1st object recursively (deep-merge). The 1st object will be modified.
  * @param {object} x - The 1st object
  * @param {object} y - The 2nd object

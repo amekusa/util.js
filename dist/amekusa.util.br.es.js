@@ -93,6 +93,20 @@ function isEmptyOrFalsy(x) {
 const isEmptyOrFalsey = isEmptyOrFalsy;
 
 /**
+ * @class TypedArray
+ */
+const TypedArray = Object.getPrototypeOf(Int8Array);
+
+/**
+ * Checks if the given value is an {@link TypedArray}.
+ * @param {any} x
+ * @return {boolean}
+ */
+function isTypedArray(x) {
+	return x instanceof TypedArray;
+}
+
+/**
  * Removes "empty" values from the given object or array.
  * @param {object|any[]} x
  * @param {number} recurse - Recursion limit
@@ -115,6 +129,37 @@ function clean(x, recurse = 8) {
 				if (!isEmpty(v)) r[k] = v;
 			}
 			return r;
+		}
+	}
+	return x;
+}
+
+/**
+ * Recursively clones the given value (deep clone). 
+ * The given value won't be modified.
+ * @param {any} x - Value to clone
+ * @param {number} [recurse=8] - Recursion limit. Negative number means unlimited
+ * @param {function} [fn] - Function to process each value. If nothing (or undefined) was returned by it, the value is handled normally
+ * @return {any} Cloned value
+ */
+function clone(x, recurse = 8, fn = undefined) {
+	if (fn) {
+		let r = fn(x);
+		if (r !== undefined) return r;
+	}
+	if (x) {
+		if (x instanceof TypedArray) {
+			return x.subarray();
+		}
+		if (recurse) {
+			if (Array.isArray(x)) {
+				return x.map(it => clone(it, recurse - 1, fn));
+			}
+			if (typeof x == 'object') {
+				let r = {};
+				for (let k in x) r[k] = clone(x[k], recurse - 1, fn);
+				return r;
+			}
 		}
 	}
 	return x;
@@ -196,7 +241,7 @@ function subst(str, data, opts = {}) {
 		? (_, m1) => (modifier(dig(data, m1), m1, data) || '')
 		: (_, m1) => (dig(data, m1) || '')
 	);
-}var gen=/*#__PURE__*/Object.freeze({__proto__:null,arr:arr,clean:clean,dig:dig,is:is,isEmpty:isEmpty,isEmptyOrFalsey:isEmptyOrFalsey,isEmptyOrFalsy:isEmptyOrFalsy,merge:merge,subst:subst});/*!
+}var gen=/*#__PURE__*/Object.freeze({__proto__:null,TypedArray:TypedArray,arr:arr,clean:clean,clone:clone,dig:dig,is:is,isEmpty:isEmpty,isEmptyOrFalsey:isEmptyOrFalsey,isEmptyOrFalsy:isEmptyOrFalsy,isTypedArray:isTypedArray,merge:merge,subst:subst});/*!
  * === @amekusa/util.js/web === *
  * MIT License
  *
@@ -415,4 +460,4 @@ function hms(d, format = null) {
  */
 function iso9075(d) {
 	return ymd(d, '-') + ' ' + hms(d, ':');
-}var time=/*#__PURE__*/Object.freeze({__proto__:null,addTime:addTime,ceil:ceil,date:date,floor:floor,hms:hms,iso9075:iso9075,localize:localize,ms:ms,quantize:quantize,round:round,ymd:ymd});export{arr,clean,dig,gen,is,isEmpty,isEmptyOrFalsey,isEmptyOrFalsy,merge,subst,time,web};
+}var time=/*#__PURE__*/Object.freeze({__proto__:null,addTime:addTime,ceil:ceil,date:date,floor:floor,hms:hms,iso9075:iso9075,localize:localize,ms:ms,quantize:quantize,round:round,ymd:ymd});export{TypedArray,arr,clean,clone,dig,gen,is,isEmpty,isEmptyOrFalsey,isEmptyOrFalsy,isTypedArray,merge,subst,time,web};

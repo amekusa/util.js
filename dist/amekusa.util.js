@@ -93,6 +93,20 @@ function isEmptyOrFalsy(x) {
 const isEmptyOrFalsey = isEmptyOrFalsy;
 
 /**
+ * @class TypedArray
+ */
+const TypedArray = Object.getPrototypeOf(Int8Array);
+
+/**
+ * Checks if the given value is an {@link TypedArray}.
+ * @param {any} x
+ * @return {boolean}
+ */
+function isTypedArray(x) {
+	return x instanceof TypedArray;
+}
+
+/**
  * Removes "empty" values from the given object or array.
  * @param {object|any[]} x
  * @param {number} recurse - Recursion limit
@@ -115,6 +129,37 @@ function clean$1(x, recurse = 8) {
 				if (!isEmpty(v)) r[k] = v;
 			}
 			return r;
+		}
+	}
+	return x;
+}
+
+/**
+ * Recursively clones the given value (deep clone). 
+ * The given value won't be modified.
+ * @param {any} x - Value to clone
+ * @param {number} [recurse=8] - Recursion limit. Negative number means unlimited
+ * @param {function} [fn] - Function to process each value. If nothing (or undefined) was returned by it, the value is handled normally
+ * @return {any} Cloned value
+ */
+function clone(x, recurse = 8, fn = undefined) {
+	if (fn) {
+		let r = fn(x);
+		if (r !== undefined) return r;
+	}
+	if (x) {
+		if (x instanceof TypedArray) {
+			return x.subarray();
+		}
+		if (recurse) {
+			if (Array.isArray(x)) {
+				return x.map(it => clone(it, recurse - 1, fn));
+			}
+			if (typeof x == 'object') {
+				let r = {};
+				for (let k in x) r[k] = clone(x[k], recurse - 1, fn);
+				return r;
+			}
 		}
 	}
 	return x;
@@ -196,7 +241,7 @@ function subst(str, data, opts = {}) {
 		? (_, m1) => (modifier(dig(data, m1), m1, data) || '')
 		: (_, m1) => (dig(data, m1) || '')
 	);
-}var gen=/*#__PURE__*/Object.freeze({__proto__:null,arr:arr,clean:clean$1,dig:dig,is:is,isEmpty:isEmpty,isEmptyOrFalsey:isEmptyOrFalsey,isEmptyOrFalsy:isEmptyOrFalsy,merge:merge$1,subst:subst});/*!
+}var gen=/*#__PURE__*/Object.freeze({__proto__:null,TypedArray:TypedArray,arr:arr,clean:clean$1,clone:clone,dig:dig,is:is,isEmpty:isEmpty,isEmptyOrFalsey:isEmptyOrFalsey,isEmptyOrFalsy:isEmptyOrFalsy,isTypedArray:isTypedArray,merge:merge$1,subst:subst});/*!
  * === @amekusa/util.js/web === *
  * MIT License
  *
@@ -643,14 +688,7 @@ class AssetImporter {
 			let {type, src} = item;
 			let url;
 
-			if (!item.resolve) { // no resolution
-				url = src;
-				if (!type) type = typeMap[ext(src)] || 'asset';
-				console.log('---- File Link ----');
-				console.log(' type:', type);
-				console.log('  src:', src);
-
-			} else { // needs resolution
+			if (item.resolve) { // needs resolution
 				let {dst:dstDir, as:dstFile} = item;
 				let create = item.resolve == 'create'; // needs creation?
 				if (create) {
@@ -681,6 +719,13 @@ class AssetImporter {
 					console.log('  dst:', dst);
 					tasks.push(copyFile(src, dst));
 				}
+
+			} else { // no resolution
+				url = src;
+				if (!type) type = typeMap[ext(src)] || 'asset';
+				console.log('---- File Link ----');
+				console.log(' type:', type);
+				console.log('  src:', src);
 			}
 
 			if (!item.private) {
@@ -1155,4 +1200,4 @@ function testInstance(construct, cases, opts = {}) {
 			}
 		}
 	});
-}var test=/*#__PURE__*/Object.freeze({__proto__:null,InvalidTest:InvalidTest,assertEqual:assertEqual,assertProps:assertProps,assertType:assertType,testFn:testFn,testInstance:testInstance,testMethod:testMethod});export{arr,clean$1 as clean,dig,gen,io,is,isEmpty,isEmptyOrFalsey,isEmptyOrFalsy,merge$1 as merge,sh,subst,test,time,web};
+}var test=/*#__PURE__*/Object.freeze({__proto__:null,InvalidTest:InvalidTest,assertEqual:assertEqual,assertProps:assertProps,assertType:assertType,testFn:testFn,testInstance:testInstance,testMethod:testMethod});export{TypedArray,arr,clean$1 as clean,clone,dig,gen,io,is,isEmpty,isEmptyOrFalsey,isEmptyOrFalsy,isTypedArray,merge$1 as merge,sh,subst,test,time,web};

@@ -147,17 +147,19 @@ export function clone(x, recurse = 8, fn = undefined) {
 		let r = fn(x);
 		if (r !== undefined) return r;
 	}
-	if (x instanceof TypedArray) {
-		return x.subarray();
-	}
-	if (recurse) {
-		if (Array.isArray(x)) {
-			return x.map(it => clone(it, recurse - 1, fn));
+	if (x) {
+		if (x instanceof TypedArray) {
+			return x.subarray();
 		}
-		if (typeof x == 'object') {
-			let r = {};
-			for (let k in x) r[k] = clone(x[k], recurse - 1, fn);
-			return r;
+		if (recurse) {
+			if (Array.isArray(x)) {
+				return x.map(it => clone(it, recurse - 1, fn));
+			}
+			if (typeof x == 'object') {
+				let r = {};
+				for (let k in x) r[k] = clone(x[k], recurse - 1, fn);
+				return r;
+			}
 		}
 	}
 	return x;

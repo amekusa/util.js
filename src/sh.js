@@ -54,9 +54,9 @@ export function exec(cmd, opts = {}) {
  * @return {string}
  */
 export function args(args, opts = {}) {
-	opts = Object.assign({
-		sep: ' ', // key-value separator
-	}, opts);
+	let {
+		sep = ' ', // key-value separator
+	} = opts;
 	let r = [];
 	for (let key in args) {
 		let value = args[key];
@@ -66,10 +66,10 @@ export function args(args, opts = {}) {
 				if (value) r.push(key);
 				break;
 			case 'number':
-				r.push(key + opts.sep + value);
+				r.push(key + sep + value);
 				break;
 			case 'string':
-				r.push(key + opts.sep + `"${value}"`);
+				r.push(key + sep + `"${value}"`);
 				break;
 			}
 		} else { // numeric key

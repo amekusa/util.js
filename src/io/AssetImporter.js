@@ -1,6 +1,6 @@
 import {existsSync, mkdirSync} from 'node:fs';
 import {copyFile, writeFile} from 'node:fs/promises';
-import {join, dirname, basename} from 'node:path';
+import path from 'node:path';
 import {ext} from '../io.js';
 
 /*!
@@ -29,7 +29,7 @@ import {ext} from '../io.js';
  */
 
 /**
- * This is for copying styles or scripts to a certain HTML directory.
+ * An utility for importing HTML assets.
  * @author Satoshi Soma (github.com/amekusa)
  */
 export class AssetImporter {
@@ -38,12 +38,14 @@ export class AssetImporter {
 	 * @param {boolean} [config.minify=false] - Prefer `*.min.*` version
 	 * @param {string} config.src - Source dir to search
 	 * @param {string} config.dst - Destination dir
+	 * @param {string} [config.dstUrl='/'] - Destination URL
 	 */
 	constructor(config) {
 		this.config = Object.assign({
 			minify: false,
 			src: '', // source dir to search
 			dst: '', // destination dir
+			dstUrl: '/', // destination url
 		}, config);
 		this.queue = [];
 		this.results = {
@@ -103,7 +105,7 @@ export class AssetImporter {
 				}
 				return r;
 			case 'local':
-				r = join(this.config.src, find[i]);
+				r = path.join(this.config.src, find[i]);
 				if (existsSync(r)) return r;
 				break;
 			case 'local:absolute':
@@ -140,16 +142,18 @@ export class AssetImporter {
 					if (!dstFile) throw `'as' property is required with {resolve: 'create'}`;
 				} else {
 					src = this.resolve(src, item.resolve);
-					if (!dstFile) dstFile = basename(src);
+					if (!dstFile) dstFile = path.basename(src);
 				}
 				if (!type) type = typeMap[ext(dstFile)] || 'asset';
 				if (!dstDir) dstDir = type + 's';
 
-				// absolute destination
-				url = join(dstDir, dstFile);
-				let dst = join(this.config.dst, url);
-				dstDir = dirname(dst);
+				url = path.join(dstDir, dstFile);
+				let dst = path.join(this.config.dst, url);
+				dstDir = path.dirname(dst);
 				if (!existsSync(dstDir)) mkdirSync(dstDir, {recursive:true});
+
+				if (path.sep != '/') url = url.replaceAll(path.sep, '/');
+				url = path.posix.join(this.config.dstUrl, url);
 
 				// create/copy file
 				if (create) {

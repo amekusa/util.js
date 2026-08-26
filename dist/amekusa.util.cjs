@@ -166,7 +166,7 @@ function clone(x, recurse = 8, fn = undefined) {
 }
 
 /**
- * Merges the 2nd object into the 1st object recursively (deep-merge). The 1st object will be modified.
+ * Merges the 2nd object into the 1st object recursively (deep merge). The 1st object will be modified.
  * @param {object} x - The 1st object
  * @param {object} y - The 2nd object
  * @param {object} [opts] - Options
@@ -513,9 +513,9 @@ function exec(cmd, opts = {}) {
  * @return {string}
  */
 function args(args, opts = {}) {
-	opts = Object.assign({
-		sep: ' ', // key-value separator
-	}, opts);
+	let {
+		sep = ' ', // key-value separator
+	} = opts;
 	let r = [];
 	for (let key in args) {
 		let value = args[key];
@@ -525,10 +525,10 @@ function args(args, opts = {}) {
 				if (value) r.push(key);
 				break;
 			case 'number':
-				r.push(key + opts.sep + value);
+				r.push(key + sep + value);
 				break;
 			case 'string':
-				r.push(key + opts.sep + `"${value}"`);
+				r.push(key + sep + `"${value}"`);
 				break;
 			}
 		} else { // numeric key
@@ -584,7 +584,7 @@ function dev(set = undefined) {
  */
 
 /**
- * This is for copying styles or scripts to a certain HTML directory.
+ * An utility for importing HTML assets.
  * @author Satoshi Soma (github.com/amekusa)
  */
 class AssetImporter {
@@ -593,12 +593,14 @@ class AssetImporter {
 	 * @param {boolean} [config.minify=false] - Prefer `*.min.*` version
 	 * @param {string} config.src - Source dir to search
 	 * @param {string} config.dst - Destination dir
+	 * @param {string} [config.dstUrl='/'] - Destination URL
 	 */
 	constructor(config) {
 		this.config = Object.assign({
 			minify: false,
 			src: '', // source dir to search
 			dst: '', // destination dir
+			dstUrl: '/', // destination url
 		}, config);
 		this.queue = [];
 		this.results = {
@@ -700,11 +702,13 @@ class AssetImporter {
 				if (!type) type = typeMap[ext(dstFile)] || 'asset';
 				if (!dstDir) dstDir = type + 's';
 
-				// absolute destination
 				url = path.join(dstDir, dstFile);
 				let dst = path.join(this.config.dst, url);
 				dstDir = path.dirname(dst);
 				if (!fs.existsSync(dstDir)) fs.mkdirSync(dstDir, {recursive:true});
+
+				if (path.sep != '/') url = url.replaceAll(path.sep, '/');
+				url = path.posix.join(this.config.dstUrl, url);
 
 				// create/copy file
 				if (create) {
@@ -774,6 +778,16 @@ const templates = {
 		`<link rel="stylesheet" href="%s">`,
 	],
 };/**
+ * `require()` a module and renews the cache.
+ * @param {string} mod - Module
+ * @return {any} Required module
+ */
+function requireNew(mod) {
+	delete require.cache[require.resolve(mod)];
+	return require(mod);
+}
+
+/**
  * Alias of `os.homedir()`.
  * @type {string}
  */
@@ -920,7 +934,7 @@ function modifyStream(fn) {
 			}
 		}
 	});
-}var io=/*#__PURE__*/Object.freeze({__proto__:null,AssetImporter:AssetImporter,clean:clean,copy:copy,ext:ext,find:find,home:home,modifyStream:modifyStream,untilde:untilde});const merge = Object.assign;
+}var io=/*#__PURE__*/Object.freeze({__proto__:null,AssetImporter:AssetImporter,clean:clean,copy:copy,ext:ext,find:find,home:home,modifyStream:modifyStream,requireNew:requireNew,untilde:untilde});const merge = Object.assign;
 
 /*!
  * === @amekusa/util.js/test === *

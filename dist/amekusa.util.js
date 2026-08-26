@@ -1,4 +1,4 @@
-import os from'node:os';import fs,{existsSync,mkdirSync}from'node:fs';import*as fsp from'node:fs/promises';import {writeFile,copyFile}from'node:fs/promises';import path,{join,basename,dirname}from'node:path';import {Transform}from'node:stream';import {env}from'node:process';import {exec as exec$1}from'node:child_process';import assert from'node:assert';/*!
+import os from'node:os';import fs,{existsSync,mkdirSync}from'node:fs';import*as fsp from'node:fs/promises';import {writeFile,copyFile}from'node:fs/promises';import path from'node:path';import {Transform}from'node:stream';import {env}from'node:process';import {exec as exec$1}from'node:child_process';import assert from'node:assert';/*!
  * === @amekusa/util.js/gen === *
  * MIT License
  *
@@ -166,7 +166,7 @@ function clone(x, recurse = 8, fn = undefined) {
 }
 
 /**
- * Merges the 2nd object into the 1st object recursively (deep-merge). The 1st object will be modified.
+ * Merges the 2nd object into the 1st object recursively (deep merge). The 1st object will be modified.
  * @param {object} x - The 1st object
  * @param {object} y - The 2nd object
  * @param {object} [opts] - Options
@@ -513,9 +513,9 @@ function exec(cmd, opts = {}) {
  * @return {string}
  */
 function args(args, opts = {}) {
-	opts = Object.assign({
-		sep: ' ', // key-value separator
-	}, opts);
+	let {
+		sep = ' ', // key-value separator
+	} = opts;
 	let r = [];
 	for (let key in args) {
 		let value = args[key];
@@ -525,10 +525,10 @@ function args(args, opts = {}) {
 				if (value) r.push(key);
 				break;
 			case 'number':
-				r.push(key + opts.sep + value);
+				r.push(key + sep + value);
 				break;
 			case 'string':
-				r.push(key + opts.sep + `"${value}"`);
+				r.push(key + sep + `"${value}"`);
 				break;
 			}
 		} else { // numeric key
@@ -584,7 +584,7 @@ function dev(set = undefined) {
  */
 
 /**
- * This is for copying styles or scripts to a certain HTML directory.
+ * An utility for importing HTML assets.
  * @author Satoshi Soma (github.com/amekusa)
  */
 class AssetImporter {
@@ -593,12 +593,14 @@ class AssetImporter {
 	 * @param {boolean} [config.minify=false] - Prefer `*.min.*` version
 	 * @param {string} config.src - Source dir to search
 	 * @param {string} config.dst - Destination dir
+	 * @param {string} [config.dstUrl='/'] - Destination URL
 	 */
 	constructor(config) {
 		this.config = Object.assign({
 			minify: false,
 			src: '', // source dir to search
 			dst: '', // destination dir
+			dstUrl: '/', // destination url
 		}, config);
 		this.queue = [];
 		this.results = {
@@ -658,7 +660,7 @@ class AssetImporter {
 				}
 				return r;
 			case 'local':
-				r = join(this.config.src, find[i]);
+				r = path.join(this.config.src, find[i]);
 				if (existsSync(r)) return r;
 				break;
 			case 'local:absolute':
@@ -695,16 +697,18 @@ class AssetImporter {
 					if (!dstFile) throw `'as' property is required with {resolve: 'create'}`;
 				} else {
 					src = this.resolve(src, item.resolve);
-					if (!dstFile) dstFile = basename(src);
+					if (!dstFile) dstFile = path.basename(src);
 				}
 				if (!type) type = typeMap[ext(dstFile)] || 'asset';
 				if (!dstDir) dstDir = type + 's';
 
-				// absolute destination
-				url = join(dstDir, dstFile);
-				let dst = join(this.config.dst, url);
-				dstDir = dirname(dst);
+				url = path.join(dstDir, dstFile);
+				let dst = path.join(this.config.dst, url);
+				dstDir = path.dirname(dst);
 				if (!existsSync(dstDir)) mkdirSync(dstDir, {recursive:true});
+
+				if (path.sep != '/') url = url.replaceAll(path.sep, '/');
+				url = path.posix.join(this.config.dstUrl, url);
 
 				// create/copy file
 				if (create) {
@@ -774,6 +778,16 @@ const templates = {
 		`<link rel="stylesheet" href="%s">`,
 	],
 };/**
+ * `require()` a module and renews the cache.
+ * @param {string} mod - Module
+ * @return {any} Required module
+ */
+function requireNew(mod) {
+	delete require.cache[require.resolve(mod)];
+	return require(mod);
+}
+
+/**
  * Alias of `os.homedir()`.
  * @type {string}
  */
@@ -920,7 +934,7 @@ function modifyStream(fn) {
 			}
 		}
 	});
-}var io=/*#__PURE__*/Object.freeze({__proto__:null,AssetImporter:AssetImporter,clean:clean,copy:copy,ext:ext,find:find,home:home,modifyStream:modifyStream,untilde:untilde});const merge = Object.assign;
+}var io=/*#__PURE__*/Object.freeze({__proto__:null,AssetImporter:AssetImporter,clean:clean,copy:copy,ext:ext,find:find,home:home,modifyStream:modifyStream,requireNew:requireNew,untilde:untilde});const merge = Object.assign;
 
 /*!
  * === @amekusa/util.js/test === *

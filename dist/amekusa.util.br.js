@@ -166,7 +166,7 @@ function clone(x, recurse = 8, fn = undefined) {
 }
 
 /**
- * Merges the 2nd object into the 1st object recursively (deep-merge). The 1st object will be modified.
+ * Merges the 2nd object into the 1st object recursively (deep merge). The 1st object will be modified.
  * @param {object} x - The 1st object
  * @param {object} y - The 2nd object
  * @param {object} [opts] - Options

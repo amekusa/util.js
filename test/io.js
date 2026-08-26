@@ -54,10 +54,12 @@ testInstance(io.AssetImporter, {
 				minify,
 				src,
 				dst,
+				dstUrl,
 			} = inst.config;
 			eq(minify, false);
 			eq(src, '');
 			eq(dst, '');
+			eq(dstUrl, '/');
 		}
 	},
 	'config': {

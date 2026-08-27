@@ -133,7 +133,7 @@ export class AssetImporter {
 			'.css': 'style',
 			'.js': 'script',
 		};
-		let minify = typeof this.config.minify == 'function';
+		let minify = typeof this.config.minify == 'function' ? this.config.minify : false;
 		let minified = /\.min\.\w+$/;
 
 		this.queue.sort((a, b) => (Number(a.order) - Number(b.order))); // sort by order

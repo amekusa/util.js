@@ -3,6 +3,8 @@ import {copyFile, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {ext} from '../io.js';
 
+const {log} = console;
+
 /*!
  * === @amekusa/util.js/io/AssetImporter === *
  * MIT License
@@ -165,15 +167,15 @@ export class AssetImporter {
 
 				// create/copy file
 				if (create) {
-					console.log('---- File Creation ----');
-					console.log(' type:', type);
-					console.log('  dst:', dst);
+					log('---- File Creation ----');
+					log(' type:', type);
+					log('  dst:', dst);
 					tasks.push(writeFile(dst, src, {encoding}));
 				} else {
-					console.log('---- File Import ----');
-					console.log(' type:', type);
-					console.log('  src:', src);
-					console.log('  dst:', dst);
+					log('---- File Import ----');
+					log(' type:', type);
+					log('  src:', src);
+					log('  dst:', dst);
 					let task;
 					if (minify && !src.match(minified) && !dst.match(minified)) {
 						url = ext(url, '.min' + extension);
@@ -188,9 +190,9 @@ export class AssetImporter {
 			} else { // no resolution
 				url = src;
 				if (!type) type = typeMap[ext(src)] || 'asset';
-				console.log('---- File Link ----');
-				console.log(' type:', type);
-				console.log('  src:', src);
+				log('---- File Link ----');
+				log(' type:', type);
+				log('  src:', src);
 			}
 
 			if (!item.private) {

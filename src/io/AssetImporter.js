@@ -3,8 +3,6 @@ import {copyFile, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {ext} from '../io.js';
 
-const {log} = console;
-
 /*!
  * === @amekusa/util.js/io/AssetImporter === *
  * MIT License
@@ -167,32 +165,23 @@ export class AssetImporter {
 
 				// create/copy file
 				if (create) {
-					log('---- File Creation ----');
-					log(' type:', type);
-					log('  dst:', dst);
-					tasks.push(writeFile(dst, src, {encoding}));
+					tasks.push(writeFile(dst, src, {encoding}).then(() => {
+						console.log('AssetImporter > Created a file:', {type, dst});
+					}));
 				} else {
-					log('---- File Import ----');
-					log(' type:', type);
-					log('  src:', src);
-					log('  dst:', dst);
-					let task;
+					let task = copyFile(src, dst);
 					if (minify && !src.match(minified) && !dst.match(minified)) {
-						url = ext(url, '.min' + extension);
-						dst = ext(dst, '.min' + extension);
-						task = copyFile(src, dst).then(() => minify(dst, item));
-					} else {
-						task = copyFile(src, dst);
+						task = task.then(() => minify(dst, item));
 					}
-					tasks.push(task);
+					tasks.push(task.then(() => {
+						console.log('AssetImporter > Imported a file:', {type, src, dst});
+					}));
 				}
 
 			} else { // no resolution
 				url = src;
 				if (!type) type = typeMap[ext(src)] || 'asset';
-				log('---- File Link ----');
-				log(' type:', type);
-				log('  src:', src);
+				console.log('AssetImporter > Linked a file:', {type, src});
 			}
 
 			if (!item.private) {

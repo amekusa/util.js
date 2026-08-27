@@ -144,7 +144,6 @@ export class AssetImporter {
 
 			if (item.resolve) { // needs resolution
 				let {dst:dstDir, as:dstFile, encoding} = item;
-				let extension = ext(dstFile);
 				let create = item.resolve == 'create'; // needs creation?
 				if (create) {
 					if (!dstFile) throw `'as' property is required with {resolve: 'create'}`;
@@ -152,6 +151,7 @@ export class AssetImporter {
 					src = this.resolve(src, item.resolve);
 					if (!dstFile) dstFile = path.basename(src);
 				}
+				let extension = ext(dstFile);
 				if (!type) type = typeMap[extension] || 'asset';
 				if (!dstDir) dstDir = type + 's';
 

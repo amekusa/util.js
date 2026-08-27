@@ -35,18 +35,21 @@ import {ext} from '../io.js';
 export class AssetImporter {
 	/**
 	 * @param {object} config
-	 * @param {boolean} [config.minify=false] - Prefer `*.min.*` version
 	 * @param {string} config.src - Source dir to search
 	 * @param {string} config.dst - Destination dir
 	 * @param {string} [config.dstUrl='/'] - Destination URL
+	 * @param {boolean|function} [config.minify=false] - If `true`, tries to import the `*.min.*` version of the `src` if it exists.
+	 *   If this is a function, the importer also calls it with each imported file that isn't minified, expecting it to be minified by the function.
+	 *   The function must return a `Promise` that resolves when the file is successfully minified.
 	 */
 	constructor(config) {
 		this.config = Object.assign({
+			src: '',
+			dst: '',
+			dstUrl: '/',
 			minify: false,
-			src: '', // source dir to search
-			dst: '', // destination dir
-			dstUrl: '/', // destination url
 		}, config);
+
 		this.queue = [];
 		this.results = {
 			script: [],
@@ -77,6 +80,7 @@ export class AssetImporter {
 				order: 0,
 				resolve: 'local',
 				private: false,
+				encoding: 'utf8',
 			}, item));
 		}
 	}
@@ -129,6 +133,9 @@ export class AssetImporter {
 			'.css': 'style',
 			'.js': 'script',
 		};
+		let minify = typeof this.config.minify == 'function';
+		let minified = /\.min\.\w+$/;
+
 		this.queue.sort((a, b) => (Number(a.order) - Number(b.order))); // sort by order
 		while (this.queue.length) {
 			let item = this.queue.shift();
@@ -136,7 +143,8 @@ export class AssetImporter {
 			let url;
 
 			if (item.resolve) { // needs resolution
-				let {dst:dstDir, as:dstFile} = item;
+				let {dst:dstDir, as:dstFile, encoding} = item;
+				let extension = ext(dstFile);
 				let create = item.resolve == 'create'; // needs creation?
 				if (create) {
 					if (!dstFile) throw `'as' property is required with {resolve: 'create'}`;
@@ -144,7 +152,7 @@ export class AssetImporter {
 					src = this.resolve(src, item.resolve);
 					if (!dstFile) dstFile = path.basename(src);
 				}
-				if (!type) type = typeMap[ext(dstFile)] || 'asset';
+				if (!type) type = typeMap[extension] || 'asset';
 				if (!dstDir) dstDir = type + 's';
 
 				url = path.join(dstDir, dstFile);
@@ -160,13 +168,21 @@ export class AssetImporter {
 					console.log('---- File Creation ----');
 					console.log(' type:', type);
 					console.log('  dst:', dst);
-					tasks.push(writeFile(dst, src));
+					tasks.push(writeFile(dst, src, {encoding}));
 				} else {
 					console.log('---- File Import ----');
 					console.log(' type:', type);
 					console.log('  src:', src);
 					console.log('  dst:', dst);
-					tasks.push(copyFile(src, dst));
+					let task;
+					if (minify && !src.match(minified) && !dst.match(minified)) {
+						url = ext(url, '.min' + extension);
+						dst = ext(dst, '.min' + extension);
+						task = copyFile(src, dst).then(() => minify(dst, item));
+					} else {
+						task = copyFile(src, dst);
+					}
+					tasks.push(task);
 				}
 
 			} else { // no resolution

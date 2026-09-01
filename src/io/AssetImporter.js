@@ -184,11 +184,12 @@ export class AssetImporter {
 				console.log('AssetImporter > Linked a file:', {type, src});
 			}
 
-			if (!(type in this.results)) this.results[type] = [];
-			this.results[type].push({
+			let result = {
 				private: !!item.private,
 				type, url,
-			});
+			};
+			if (type in this.results) this.results[type].push(result);
+			else this.results[type] = [result];
 		}
 
 		return tasks.length ? Promise.all(tasks) : Promise.resolve();

@@ -184,10 +184,11 @@ export class AssetImporter {
 				console.log('AssetImporter > Linked a file:', {type, src});
 			}
 
-			if (!item.private) {
-				if (!(type in this.results)) this.results[type] = [];
-				this.results[type].push({type, url});
-			}
+			if (!(type in this.results)) this.results[type] = [];
+			this.results[type].push({
+				private: !!item.private,
+				type, url,
+			});
 		}
 
 		return tasks.length ? Promise.all(tasks) : Promise.resolve();
@@ -198,21 +199,20 @@ export class AssetImporter {
 	 * @return {string} HTML
 	 */
 	toHTML(type = null) {
-		let r;
+		let r = [];
 		if (type) {
 			let tmpl = templates[type];
 			if (!tmpl) return '';
 			if (Array.isArray(tmpl)) tmpl = tmpl.join('\n');
 			let items = this.results[type];
-			r = new Array(items.length);
 			for (let i = 0; i < items.length; i++) {
-				r[i] = tmpl.replaceAll('%s', items[i].url || '');
+				if (items[i].private) continue;
+				r.push(tmpl.replaceAll('%s', items[i].url || ''));
 			}
 		} else {
 			let keys = Object.keys(this.results);
-			r = new Array(keys.length);
 			for (let i = 0; i < keys.length; i++) {
-				r[i] = this.toHTML(keys[i]);
+				r.push(this.toHTML(keys[i]));
 			}
 		}
 		return r.join('\n');

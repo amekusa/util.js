@@ -212,7 +212,7 @@ export class AssetImporter {
 							assign(result, {type, src, dst, url});
 							log('AssetImporter > Skipped importing a file:', result);
 						}
-						this.timestamp[src] = mtime;
+						this.timestamps[src] = mtime;
 						let task = copyFile(src, dst);
 						if (minify && !src.match(minified) && !dst.match(minified)) {
 							task = task.then(() => minify(dst, item));

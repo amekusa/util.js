@@ -248,10 +248,10 @@ export class AssetImporter {
 			if (isArray(tmpl)) tmpl = tmpl.join('\n');
 			let items = this.results[type];
 			for (let i = 0; i < items.length; i++) {
-				let {private, url} = items[i];
-				if (private) continue;
-				if (!url) continue;
-				r.push(tmpl.replaceAll('%s', url));
+				let I = items[i];
+				if (I.private) continue;
+				if (!I.url) continue;
+				r.push(tmpl.replaceAll('%s', I.url));
 			}
 		} else {
 			let keys = Object.keys(this.results);

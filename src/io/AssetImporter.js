@@ -1,7 +1,11 @@
 import {existsSync, mkdirSync} from 'node:fs';
-import {copyFile, writeFile} from 'node:fs/promises';
+import {stat, copyFile, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {ext} from '../io.js';
+
+const {log} = console;
+const {assign} = Object;
+const {isArray} = Array;
 
 /*!
  * === @amekusa/util.js/io/AssetImporter === *
@@ -43,26 +47,45 @@ export class AssetImporter {
 	 *   The function must return a `Promise` that resolves when the file is successfully minified.
 	 */
 	constructor(config) {
-		this.config = Object.assign({
+		this.config = assign({
 			src: '',
 			dst: '',
 			dstUrl: '/',
 			minify: false,
+
 		}, config);
 
+		/**
+		 * @type {Asset[]}
+		 */
 		this.queue = [];
-		this.results = {
-			script: [],
-			style:  [],
-			asset:  [],
-		};
+
+		/**
+		 * @type {Object.<AssetSource, number>}
+		 */
+		this.timestamps = {};
+
+		/**
+		 * @type {null|Object.<AssetType, ImportResult>}
+		 */
+		this.results = null;
+	}
+	/**
+	 * @private
+	 * @param {AssetType} type
+	 * @param {ImportResult} result
+	 */
+	addResult(type, result) {
+		if (!this.results) this.results = {[type]: [result]};
+		else if (isArray(this.results[type])) this.results[type].push(result);
+		else this.results[type] = [result];
 	}
 	/**
 	 * Adds a new item to import.
 	 * @param {string|string[]|object|object[]} newImport
 	 */
 	add(newImport) {
-		if (!Array.isArray(newImport)) newImport = [newImport];
+		if (!isArray(newImport)) newImport = [newImport];
 		for (let i = 0; i < newImport.length; i++) {
 			let item = newImport[i];
 			switch (typeof item) {
@@ -70,13 +93,13 @@ export class AssetImporter {
 				item = {src: item};
 				break;
 			case 'object':
-				if (Array.isArray(item)) throw `invalid type: array`;
+				if (isArray(item)) throw `invalid type: array`;
 				break;
 			default:
 				throw `invalid type: ${typeof item}`;
 			}
 			if (!('src' in item)) throw `'src' property is missing`;
-			this.queue.push(Object.assign({
+			this.queue.push(assign({
 				order: 0,
 				resolve: 'local',
 				private: false,
@@ -129,67 +152,85 @@ export class AssetImporter {
 	 */
 	import() {
 		let tasks = [];
-		let typeMap = {
+		let typeMap = { // @map: file extension -> asset type
 			'.css': 'style',
 			'.js': 'script',
 		};
 		let minify = typeof this.config.minify == 'function' ? this.config.minify : false;
 		let minified = /\.min\.\w+$/;
 
+		this.results = null;
 		this.queue.sort((a, b) => (Number(a.order) - Number(b.order))); // sort by order
 		while (this.queue.length) {
 			let item = this.queue.shift();
 			let {type, src} = item;
-			let url;
+			let result = {private: !!item.private};
 
 			if (item.resolve) { // needs resolution
 				let {dst:dstDir, as:dstFile, encoding} = item;
+
+				// resolve source
 				let create = item.resolve == 'create'; // needs creation?
 				if (create) {
 					if (!dstFile) throw `'as' property is required with {resolve: 'create'}`;
 				} else {
-					src = this.resolve(src, item.resolve);
+					src = this.resolve(src, item.resolve); // get source file path
 					if (!dstFile) dstFile = path.basename(src);
 				}
+
+				// determine asset type from file extension
 				let extension = ext(dstFile);
 				if (!type) type = typeMap[extension] || 'asset';
-				if (!dstDir) dstDir = type + 's';
+				if (!dstDir) dstDir = type + 's'; // default destination dir based on asset type
 
-				url = path.join(dstDir, dstFile);
-				let dst = path.join(this.config.dst, url);
-				dstDir = path.dirname(dst);
-				if (!existsSync(dstDir)) mkdirSync(dstDir, {recursive:true});
+				// store result
+				this.addResult(type, result);
 
+				// compose url
+				let url = path.join(dstDir, dstFile);
 				if (path.sep != '/') url = url.replaceAll(path.sep, '/');
 				url = path.posix.join(this.config.dstUrl, url);
 
+				// secure destination
+				let dst = path.join(this.config.dst, dstDir, dstFile);
+				dstDir = path.dirname(dst);
+				mkdirSync(dstDir, {recursive: true});
+
 				// create/copy file
+				let task;
 				if (create) {
 					tasks.push(writeFile(dst, src, {encoding}).then(() => {
-						console.log('AssetImporter > Created a file:', {type, dst});
+						assign(result, {type, dst, url});
+						log('AssetImporter > Created a file:', result);
 					}));
-				} else {
-					let task = copyFile(src, dst);
-					if (minify && !src.match(minified) && !dst.match(minified)) {
-						task = task.then(() => minify(dst, item));
-					}
-					tasks.push(task.then(() => {
-						console.log('AssetImporter > Imported a file:', {type, src, dst});
+
+				} else { // copy
+					tasks.push(stat(src).then(stats => {
+						let mtime = stats.mtimeMs;
+						let ts = this.timestamps[src];
+						if (ts && ts >= mtime) {
+							assign(result, {type, src, dst, url});
+							log('AssetImporter > Skipped importing a file:', result);
+						}
+						this.timestamp[src] = mtime;
+						let task = copyFile(src, dst);
+						if (minify && !src.match(minified) && !dst.match(minified)) {
+							task = task.then(() => minify(dst, item));
+						}
+						return task.then(() => {
+							assign(result, {type, src, dst, url});
+							log('AssetImporter > Imported a file:', result);
+						});
 					}));
 				}
-
+				
 			} else { // no resolution
-				url = src;
 				if (!type) type = typeMap[ext(src)] || 'asset';
-				console.log('AssetImporter > Linked a file:', {type, src});
+				assign(result, {type, src, url: src});
+				this.addResult(type, result);
+				log('AssetImporter > Linked a file:', result);
 			}
 
-			let result = {
-				private: !!item.private,
-				type, url,
-			};
-			if (type in this.results) this.results[type].push(result);
-			else this.results[type] = [result];
 		}
 
 		return tasks.length ? Promise.all(tasks) : Promise.resolve();
@@ -204,11 +245,13 @@ export class AssetImporter {
 		if (type) {
 			let tmpl = templates[type];
 			if (!tmpl) return '';
-			if (Array.isArray(tmpl)) tmpl = tmpl.join('\n');
+			if (isArray(tmpl)) tmpl = tmpl.join('\n');
 			let items = this.results[type];
 			for (let i = 0; i < items.length; i++) {
-				if (items[i].private) continue;
-				r.push(tmpl.replaceAll('%s', items[i].url || ''));
+				let {private, url} = items[i];
+				if (private) continue;
+				if (!url) continue;
+				r.push(tmpl.replaceAll('%s', url));
 			}
 		} else {
 			let keys = Object.keys(this.results);

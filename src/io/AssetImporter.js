@@ -210,7 +210,7 @@ export class AssetImporter {
 						let ts = this.timestamps[src];
 						if (ts && ts >= mtime) {
 							assign(result, {type, src, dst, url});
-							log('AssetImporter > Skipped importing a file:', result);
+							// log('AssetImporter > Skipped importing a file:', result);
 							return;
 						}
 						this.timestamps[src] = mtime;

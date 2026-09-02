@@ -211,6 +211,7 @@ export class AssetImporter {
 						if (ts && ts >= mtime) {
 							assign(result, {type, src, dst, url});
 							log('AssetImporter > Skipped importing a file:', result);
+							return;
 						}
 						this.timestamps[src] = mtime;
 						let task = copyFile(src, dst);

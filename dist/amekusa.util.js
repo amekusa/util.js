@@ -762,9 +762,8 @@ class AssetImporter {
 					tasks.push(stat(src).then(stats => {
 						let mtime = stats.mtimeMs;
 						let ts = this.timestamps[src];
-						if (ts && ts >= mtime) {
+						if (ts && ts >= mtime) { // unchanged
 							assign(result, {type, src, dst, url});
-							// log('AssetImporter > Skipped importing a file:', result);
 							return;
 						}
 						this.timestamps[src] = mtime;

@@ -197,7 +197,6 @@ export class AssetImporter {
 				mkdirSync(dstDir, {recursive: true});
 
 				// create/copy file
-				let task;
 				if (create) {
 					tasks.push(writeFile(dst, src, {encoding}).then(() => {
 						assign(result, {type, dst, url});
@@ -214,11 +213,11 @@ export class AssetImporter {
 							return;
 						}
 						this.timestamps[src] = mtime;
-						let task = copyFile(src, dst);
+						let r = copyFile(src, dst);
 						if (minify && !src.match(minified) && !dst.match(minified)) {
-							task = task.then(() => minify(dst, item));
+							r = r.then(() => minify(dst, item));
 						}
-						return task.then(() => {
+						return r.then(() => {
 							assign(result, {type, src, dst, url});
 							log('AssetImporter > Imported a file:', result);
 						});

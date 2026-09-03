@@ -158,8 +158,8 @@ export function copy(src, dst) {
 }
 
 /**
- * Returns a Transform stream object with the given function as its transform() method.
- * `fn` must return a string which is to be the new content, or a Promise which resolves a string.
+ * Returns a Transform instance that can read/write a stream with the given function.
+ * `fn` must return a string as the new content of the stream, or a Promise that fullfills with the new content.
  *
  * @example
  * return gulp.src(src)
@@ -171,7 +171,7 @@ export function copy(src, dst) {
  * @param {function} fn
  * @return {Transform}
  */
-export function modifyStream(fn) {
+export function transform(fn) {
 	return new Transform({
 		objectMode: true,
 		transform(file, enc, done) {

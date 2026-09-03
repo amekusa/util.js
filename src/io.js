@@ -158,7 +158,7 @@ export function copy(src, dst) {
 }
 
 /**
- * Returns a Transform instance that can read/write a stream with the given function.
+ * Creates a Transform object that can read/write a stream with an arbitrary function.
  * `fn` must return a string as the new content of the stream, or a Promise that fullfills with the new content.
  *
  * @example

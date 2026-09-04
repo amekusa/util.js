@@ -175,7 +175,8 @@ export function clone(x, recurse = 8, fn = undefined) {
  * - `true`: merge x with y
  * - 'push': push y elements to x
  * - 'concat': concat x and y
- * - other: replace x with y
+ * - 'replace': replace x with y
+ * - 'ignore': do nothing
  * @return {object} The 1st object
  */
 export function merge(x, y, opts = {}) {
@@ -203,6 +204,10 @@ export function merge(x, y, opts = {}) {
 		return x;
 	case 'concat':
 		return x.concat(y);
+	case 'replace':
+		return y;
+	case 'ignore':
+		return x;
 	}
 	return y;
 }

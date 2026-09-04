@@ -1,6 +1,5 @@
 import os from 'node:os';
-import fs from 'node:fs';
-import * as fsp from 'node:fs/promises';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import {Transform} from 'node:stream';
 import {exec} from './sh.js';
@@ -93,7 +92,7 @@ export function clean(dir, pattern = null, opts = {}) {
 		recursive = false,
 		types = {file: true},
 	} = opts;
-	return fsp.readdir(dir, {recursive, withFileTypes: true}).then(files => {
+	return fs.readdir(dir, {recursive, withFileTypes: true}).then(files => {
 		let tasks = [];
 		for (let i = 0; i < files.length; i++) {
 			let f = files[i];
@@ -108,7 +107,7 @@ export function clean(dir, pattern = null, opts = {}) {
 			}
 			f = path.join(dir, f.name);
 			if (pattern && !f.match(pattern)) continue;
-			tasks.push(fsp.rm(f, {force: true, recursive: true}).then(() => f));
+			tasks.push(fs.rm(f, {force: true, recursive: true}).then(() => f));
 		}
 		return tasks.length ? Promise.all(tasks) : false;
 	});
@@ -135,7 +134,7 @@ export function copy(src, dst) {
 			throw 'invalid type';
 		}
 		_dst = path.join(dst, _dst || path.basename(_src));
-		return fsp.mkdir(path.dirname(_dst), {recursive: true}).then(fsp.copyFile(_src, _dst));
+		return fs.mkdir(path.dirname(_dst), {recursive: true}).then(fs.copyFile(_src, _dst));
 	}));
 }
 

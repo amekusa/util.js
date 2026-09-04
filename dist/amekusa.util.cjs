@@ -1,4 +1,4 @@
-'use strict';var os=require('node:os'),fs=require('node:fs'),fsp=require('node:fs/promises'),path=require('node:path'),node_stream=require('node:stream'),node_process=require('node:process'),node_child_process=require('node:child_process'),assert=require('node:assert');function _interopNamespaceDefault(e){var n=Object.create(null);if(e){Object.keys(e).forEach(function(k){if(k!=='default'){var d=Object.getOwnPropertyDescriptor(e,k);Object.defineProperty(n,k,d.get?d:{enumerable:true,get:function(){return e[k]}});}})}n.default=e;return Object.freeze(n)}var fsp__namespace=/*#__PURE__*/_interopNamespaceDefault(fsp);/*!
+'use strict';var os=require('node:os'),fs=require('node:fs/promises'),path=require('node:path'),node_stream=require('node:stream'),node_process=require('node:process'),node_child_process=require('node:child_process'),node_fs=require('node:fs'),assert=require('node:assert');/*!
  * === @amekusa/util.js/gen === *
  * MIT License
  *
@@ -175,7 +175,8 @@ function clone(x, recurse = 8, fn = undefined) {
  * - `true`: merge x with y
  * - 'push': push y elements to x
  * - 'concat': concat x and y
- * - other: replace x with y
+ * - 'replace': replace x with y
+ * - 'ignore': do nothing
  * @return {object} The 1st object
  */
 function merge$1(x, y, opts = {}) {
@@ -203,6 +204,10 @@ function merge$1(x, y, opts = {}) {
 		return x;
 	case 'concat':
 		return x.concat(y);
+	case 'replace':
+		return y;
+	case 'ignore':
+		return x;
 	}
 	return y;
 }
@@ -688,12 +693,12 @@ class AssetImporter {
 				return r;
 			case 'local':
 				r = path.join(this.config.src, find[i]);
-				if (fs.existsSync(r)) return r;
+				if (node_fs.existsSync(r)) return r;
 				break;
 			case 'local:absolute':
 			case 'local:abs':
 				r = find[i];
-				if (fs.existsSync(r)) return r;
+				if (node_fs.existsSync(r)) return r;
 				break;
 			default:
 				throw `invalid resolution method: ${method}`;
@@ -749,17 +754,17 @@ class AssetImporter {
 				// secure destination
 				let dst = path.join(this.config.dst, dstDir, dstFile);
 				dstDir = path.dirname(dst);
-				fs.mkdirSync(dstDir, {recursive: true});
+				node_fs.mkdirSync(dstDir, {recursive: true});
 
 				// create/copy file
 				if (create) {
-					tasks.push(fsp.writeFile(dst, src, {encoding}).then(() => {
+					tasks.push(fs.writeFile(dst, src, {encoding}).then(() => {
 						assign(result, {type, dst, url});
 						log('AssetImporter > Created a file:', result);
 					}));
 
 				} else { // copy
-					tasks.push(fsp.stat(src).then(stats => {
+					tasks.push(fs.stat(src).then(stats => {
 						let mtime = stats.mtimeMs;
 						let ts = this.timestamps[src];
 						if (ts && ts >= mtime) { // unchanged
@@ -767,7 +772,7 @@ class AssetImporter {
 							return;
 						}
 						this.timestamps[src] = mtime;
-						let r = fsp.copyFile(src, dst);
+						let r = fs.copyFile(src, dst);
 						if (minify && !src.match(minified) && !dst.match(minified)) {
 							r = r.then(() => minify(dst, item));
 						}
@@ -828,6 +833,12 @@ const templates = {
 		`<link rel="stylesheet" href="%s">`,
 	],
 };/**
+ * Alias of `os.homedir()`.
+ * @type {string}
+ */
+const home = os.homedir();
+
+/**
  * `require()` a module and renews the cache.
  * @param {string} mod - Module
  * @return {any} Required module
@@ -838,40 +849,16 @@ function requireNew(mod) {
 }
 
 /**
- * Alias of `os.homedir()`.
- * @type {string}
- */
-const home = os.homedir();
-
-/**
- * Returns or overwrites the extension of the given file path.
+ * Returns or replaces the extension of the given file path.
  * @param {string} file - File path
  * @param {string} [set] - New extension
- * @return {string} the extension, or a modified file path with the new extension
+ * @return {string} The extension, or a modified file path with the replaced extension
  */
 function ext(file, set = null) {
 	let dot = file.lastIndexOf('.');
 	return typeof set == 'string'
 		? (dot < 0 ? (file + set) : (file.substring(0, dot) + set))
 		: (dot < 0 ? '' : file.substring(dot));
-}
-
-/**
- * Searches the given file path in the given directories.
- * @param {string} file - File to find
- * @param {string[]} dirs - Array of directories to search
- * @param {object} [opts] - Options
- * @param {boolean} [opts.allowAbsolute=true] - If true, `file` can be an absolute path
- * @return {string|boolean} found file path, or false if not found
- */
-function find(file, dirs = [], opts = {}) {
-	let {allowAbsolute = true} = opts;
-	if (allowAbsolute && path.isAbsolute(file)) return fs.existsSync(file) ? file : false;
-	for (let i = 0; i < dirs.length; i++) {
-		let find = path.join(dirs[i], file);
-		if (fs.existsSync(find)) return find;
-	}
-	return false;
 }
 
 /**
@@ -906,7 +893,7 @@ function clean(dir, pattern = null, opts = {}) {
 		recursive = false,
 		types = {file: true},
 	} = opts;
-	return fsp__namespace.readdir(dir, {recursive, withFileTypes: true}).then(files => {
+	return fs.readdir(dir, {recursive, withFileTypes: true}).then(files => {
 		let tasks = [];
 		for (let i = 0; i < files.length; i++) {
 			let f = files[i];
@@ -921,7 +908,7 @@ function clean(dir, pattern = null, opts = {}) {
 			}
 			f = path.join(dir, f.name);
 			if (pattern && !f.match(pattern)) continue;
-			tasks.push(fsp__namespace.rm(f, {force: true, recursive: true}).then(() => f));
+			tasks.push(fs.rm(f, {force: true, recursive: true}).then(() => f));
 		}
 		return tasks.length ? Promise.all(tasks) : false;
 	});
@@ -948,13 +935,15 @@ function copy(src, dst) {
 			throw 'invalid type';
 		}
 		_dst = path.join(dst, _dst || path.basename(_src));
-		return fsp__namespace.mkdir(path.dirname(_dst), {recursive: true}).then(fsp__namespace.copyFile(_src, _dst));
+		return fs.mkdir(path.dirname(_dst), {recursive: true}).then(fs.copyFile(_src, _dst));
 	}));
 }
 
 /**
- * Returns a Transform stream object with the given function as its transform() method.
- * `fn` must return a string which is to be the new content, or a Promise which resolves a string.
+ * Creates a Transform object that can read/write a stream with an arbitrary function.
+ * `fn` must return a string as the new content of the stream, or a Promise that fullfills with the new content.
+ * The 1st parameter of `fn` is the current content of the stream.
+ * The 2nd is the encoding of the stream.
  *
  * @example
  * return gulp.src(src)
@@ -966,7 +955,7 @@ function copy(src, dst) {
  * @param {function} fn
  * @return {Transform}
  */
-function modifyStream(fn) {
+function transform(fn) {
 	return new node_stream.Transform({
 		objectMode: true,
 		transform(file, enc, done) {
@@ -984,7 +973,13 @@ function modifyStream(fn) {
 			}
 		}
 	});
-}var io=/*#__PURE__*/Object.freeze({__proto__:null,AssetImporter:AssetImporter,clean:clean,copy:copy,ext:ext,find:find,home:home,modifyStream:modifyStream,requireNew:requireNew,untilde:untilde});const merge = Object.assign;
+}
+
+/**
+ * @deprecated
+ * @alias transform
+ */
+const modifyStream = transform;var io=/*#__PURE__*/Object.freeze({__proto__:null,AssetImporter:AssetImporter,clean:clean,copy:copy,ext:ext,home:home,modifyStream:modifyStream,requireNew:requireNew,transform:transform,untilde:untilde});const merge = Object.assign;
 
 /*!
  * === @amekusa/util.js/test === *

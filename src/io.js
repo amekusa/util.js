@@ -160,6 +160,8 @@ export function copy(src, dst) {
 /**
  * Creates a Transform object that can read/write a stream with an arbitrary function.
  * `fn` must return a string as the new content of the stream, or a Promise that fullfills with the new content.
+ * The 1st parameter of `fn` is the current content of the stream.
+ * The 2nd is the encoding of the stream.
  *
  * @example
  * return gulp.src(src)

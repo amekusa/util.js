@@ -62,24 +62,6 @@ export function ext(file, set = null) {
 }
 
 /**
- * Searches the given file path in the given directories.
- * @param {string} file - File to find
- * @param {string[]} dirs - Array of directories to search
- * @param {object} [opts] - Options
- * @param {boolean} [opts.allowAbsolute=true] - If true, `file` can be an absolute path
- * @return {string|boolean} found file path, or false if not found
- */
-export function find(file, dirs = [], opts = {}) {
-	let {allowAbsolute = true} = opts;
-	if (allowAbsolute && path.isAbsolute(file)) return fs.existsSync(file) ? file : false;
-	for (let i = 0; i < dirs.length; i++) {
-		let find = path.join(dirs[i], file);
-		if (fs.existsSync(find)) return find;
-	}
-	return false;
-}
-
-/**
  * Replaces the beginning `~` character with `os.homedir()`.
  * @param {string} file - File path
  * @param {string} [replace=os.homedir()] - Replacement

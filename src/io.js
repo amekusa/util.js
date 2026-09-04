@@ -49,12 +49,12 @@ export function requireNew(mod) {
 export const home = os.homedir();
 
 /**
- * Returns or overwrites the extension of the given file path.
+ * Returns or replaces the extension of the given file path.
  * @param {string} file - File path
  * @param {string} [set] - New extension
- * @return {string} the extension, or a modified file path with the new extension
+ * @return {string} The extension, or a modified file path with the replaced extension
  */
-export function ext(file, set = null) {
+export function extension(file, set = null) {
 	let dot = file.lastIndexOf('.');
 	return typeof set == 'string'
 		? (dot < 0 ? (file + set) : (file.substring(0, dot) + set))

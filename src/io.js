@@ -33,6 +33,12 @@ import {exec} from './sh.js';
 export {AssetImporter} from './io/AssetImporter.js';
 
 /**
+ * Alias of `os.homedir()`.
+ * @type {string}
+ */
+export const home = os.homedir();
+
+/**
  * `require()` a module and renews the cache.
  * @param {string} mod - Module
  * @return {any} Required module
@@ -41,12 +47,6 @@ export function requireNew(mod) {
 	delete require.cache[require.resolve(mod)];
 	return require(mod);
 }
-
-/**
- * Alias of `os.homedir()`.
- * @type {string}
- */
-export const home = os.homedir();
 
 /**
  * Returns or replaces the extension of the given file path.

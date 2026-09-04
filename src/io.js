@@ -54,7 +54,7 @@ export const home = os.homedir();
  * @param {string} [set] - New extension
  * @return {string} The extension, or a modified file path with the replaced extension
  */
-export function extension(file, set = null) {
+export function ext(file, set = null) {
 	let dot = file.lastIndexOf('.');
 	return typeof set == 'string'
 		? (dot < 0 ? (file + set) : (file.substring(0, dot) + set))
@@ -190,4 +190,10 @@ export function transform(fn) {
 		}
 	});
 }
+
+/**
+ * @deprecated
+ * @alias transform
+ */
+export const modifyStream = transform;
 

@@ -131,7 +131,7 @@ export class AssetImporter {
 			switch (method) {
 			case 'require':
 				try {
-					r = require.resolve(find[i]);
+					r = require.resolve(find[i], {paths: [cwd()]});
 				} catch (e) {
 					if (e.code == 'MODULE_NOT_FOUND') continue;
 					throw e;

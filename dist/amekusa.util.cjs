@@ -593,6 +593,14 @@ const {isArray} = Array;
  */
 
 /**
+ * A definition of an asset to import.
+ * If it is a string, gets converted to an object with the string as `src` property.
+ * @typedef {string|object} Asset
+ * @property {string|string[]} src - Source(s)
+ * @property {string} [resolve='local'] - Resolution method.
+ */
+
+/**
  * An utility for importing HTML assets.
  * @author Satoshi Soma (github.com/amekusa)
  */
@@ -640,13 +648,13 @@ class AssetImporter {
 		else this.results[type] = [result];
 	}
 	/**
-	 * Adds a new item to import.
-	 * @param {string|string[]|object|object[]} newImport
+	 * Adds a new asset to import.
+	 * @param {Asset|Asset[]} asset - Asset definition
 	 */
-	add(newImport) {
-		if (!isArray(newImport)) newImport = [newImport];
-		for (let i = 0; i < newImport.length; i++) {
-			let item = newImport[i];
+	add(asset) {
+		if (!isArray(asset)) asset = [asset];
+		for (let i = 0; i < asset.length; i++) {
+			let item = asset[i];
 			switch (typeof item) {
 			case 'string':
 				item = {src: item};
@@ -659,7 +667,7 @@ class AssetImporter {
 			}
 			if (!('src' in item)) throw `'src' property is missing`;
 			let {src} = item;
-			src = isArray(src) ? src : [src];
+			if (!isArray(src)) src = [src];
 			for (let j = 0; j < src.length; j++) {
 				let _item = assign({
 					order: 0,
@@ -728,18 +736,24 @@ class AssetImporter {
 		this.queue.sort((a, b) => (Number(a.order) - Number(b.order))); // sort by order
 		while (this.queue.length) {
 			let item = this.queue.shift();
-			let {type, src} = item;
+			let {resolve, type, src} = item;
 			let result = {private: !!item.private};
 
-			if (item.resolve) { // needs resolution
+			if (resolve == 'link') { 
+				if (!type) type = typeMap[ext(src)] || 'asset';
+				assign(result, {type, src, url: src});
+				this.addResult(type, result);
+				log('AssetImporter > Linked a file:', result);
+
+			} else {
 				let {dst:dstDir, as:dstFile, encoding} = item;
 
 				// resolve source
-				let create = item.resolve == 'create'; // needs creation?
+				let create = resolve == 'create'; // needs creation?
 				if (create) {
 					if (!dstFile) throw `'as' property is required with {resolve: 'create'}`;
 				} else {
-					src = this.resolve(src, item.resolve); // get source file path
+					src = this.resolve(src, resolve); // get source file path
 					if (!dstFile) dstFile = path.basename(src);
 				}
 
@@ -787,14 +801,7 @@ class AssetImporter {
 						});
 					}));
 				}
-				
-			} else { // no resolution
-				if (!type) type = typeMap[ext(src)] || 'asset';
-				assign(result, {type, src, url: src});
-				this.addResult(type, result);
-				log('AssetImporter > Linked a file:', result);
 			}
-
 		}
 
 		return tasks.length ? Promise.all(tasks) : Promise.resolve();

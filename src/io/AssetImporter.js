@@ -1,3 +1,4 @@
+import {cwd} from 'node:process';
 import {existsSync, mkdirSync} from 'node:fs';
 import {stat, copyFile, writeFile} from 'node:fs/promises';
 import path from 'node:path';
@@ -52,7 +53,6 @@ export class AssetImporter {
 			dst: '',
 			dstUrl: '/',
 			minify: false,
-
 		}, config);
 
 		/**
@@ -99,12 +99,18 @@ export class AssetImporter {
 				throw `invalid type: ${typeof item}`;
 			}
 			if (!('src' in item)) throw `'src' property is missing`;
-			this.queue.push(assign({
-				order: 0,
-				resolve: 'local',
-				private: false,
-				encoding: 'utf8',
-			}, item));
+			let {src} = item;
+			src = isArray(src) ? src : [src];
+			for (let j = 0; j < src.length; j++) {
+				let _item = assign({
+					order: 0,
+					resolve: 'local',
+					private: false,
+					encoding: 'utf8',
+				}, item);
+				_item.src = src[j];
+				this.queue.push(_item);
+			}
 		}
 	}
 	/**

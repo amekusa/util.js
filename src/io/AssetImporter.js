@@ -89,13 +89,13 @@ export class AssetImporter {
 		else this.results[type] = [result];
 	}
 	/**
-	 * Adds a new item to import.
-	 * @param {string|string[]|object|object[]} newImport
+	 * Adds a new asset to import.
+	 * @param {Asset|Asset[]} asset - Asset definition
 	 */
-	add(newImport) {
-		if (!isArray(newImport)) newImport = [newImport];
-		for (let i = 0; i < newImport.length; i++) {
-			let item = newImport[i];
+	add(asset) {
+		if (!isArray(asset)) asset = [asset];
+		for (let i = 0; i < asset.length; i++) {
+			let item = asset[i];
 			switch (typeof item) {
 			case 'string':
 				item = {src: item};
@@ -242,14 +242,7 @@ export class AssetImporter {
 						});
 					}));
 				}
-				
-			} else { // no resolution
-				if (!type) type = typeMap[ext(src)] || 'asset';
-				assign(result, {type, src, url: src});
-				this.addResult(type, result);
-				log('AssetImporter > Linked a file:', result);
 			}
-
 		}
 
 		return tasks.length ? Promise.all(tasks) : Promise.resolve();

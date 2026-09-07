@@ -34,6 +34,14 @@ const {isArray} = Array;
  */
 
 /**
+ * A definition of an asset to import.
+ * If it is a string, gets converted to an object with the string as `src` property.
+ * @typedef {string|object} Asset
+ * @property {string|string[]} src - Source(s)
+ * @property {string} [resolve='local'] - Resolution method.
+ */
+
+/**
  * An utility for importing HTML assets.
  * @author Satoshi Soma (github.com/amekusa)
  */

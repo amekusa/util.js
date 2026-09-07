@@ -177,18 +177,24 @@ export class AssetImporter {
 		this.queue.sort((a, b) => (Number(a.order) - Number(b.order))); // sort by order
 		while (this.queue.length) {
 			let item = this.queue.shift();
-			let {type, src} = item;
+			let {resolve, type, src} = item;
 			let result = {private: !!item.private};
 
-			if (item.resolve) { // needs resolution
+			if (resolve == 'link') { 
+				if (!type) type = typeMap[ext(src)] || 'asset';
+				assign(result, {type, src, url: src});
+				this.addResult(type, result);
+				log('AssetImporter > Linked a file:', result);
+
+			} else {
 				let {dst:dstDir, as:dstFile, encoding} = item;
 
 				// resolve source
-				let create = item.resolve == 'create'; // needs creation?
+				let create = resolve == 'create'; // needs creation?
 				if (create) {
 					if (!dstFile) throw `'as' property is required with {resolve: 'create'}`;
 				} else {
-					src = this.resolve(src, item.resolve); // get source file path
+					src = this.resolve(src, resolve); // get source file path
 					if (!dstFile) dstFile = path.basename(src);
 				}
 

@@ -100,7 +100,7 @@ export class AssetImporter {
 			}
 			if (!('src' in item)) throw `'src' property is missing`;
 			let {src} = item;
-			src = isArray(src) ? src : [src];
+			if (!isArray(src)) src = [src];
 			for (let j = 0; j < src.length; j++) {
 				let _item = assign({
 					order: 0,

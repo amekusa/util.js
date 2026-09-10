@@ -146,7 +146,7 @@ export function copy(src, dst) {
  *
  * @example
  * return gulp.src(src)
- *   .pipe(modifyStream((data, enc) => {
+ *   .pipe(transform((data, enc) => {
  *     // do stuff
  *     return newData;
  *   }));
